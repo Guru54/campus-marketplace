@@ -7,7 +7,7 @@ const collegeSchema = new mongoose.Schema(
       type: String,
       required: [true, "College name is required"],
       trim: true,
-      unique: true,
+      unique: true,   // ← index already created here ✅
     },
 
     domain: {
@@ -15,7 +15,7 @@ const collegeSchema = new mongoose.Schema(
       required: [true, "College domain is required"],
       trim: true,
       lowercase: true,
-      unique: true,
+      unique: true,   // ← index already created here ✅
       match: [
         /^[a-z0-9.-]+\.[a-z]{2,}$/,
         "Invalid domain format",
@@ -47,8 +47,8 @@ const collegeSchema = new mongoose.Schema(
 );
 
 // ── Indexes ────────────────────────────────────────────────
-collegeSchema.index({ name: 1 },   { unique: true });
-collegeSchema.index({ domain: 1 }, { unique: true });
-collegeSchema.index({ city: 1, state: 1 });
+// name  → unique: true already handles it ✅ removed duplicate
+// domain → unique: true already handles it ✅ removed duplicate
+collegeSchema.index({ city: 1, state: 1 }); // ← only this needed
 
 module.exports = mongoose.model("College", collegeSchema);

@@ -108,10 +108,14 @@ const listingSchema = new mongoose.Schema(
 );
 
 // ── Indexes ────────────────────────────────────────────────
-listingSchema.index({ college: 1, status: 1 }); // most common query
-listingSchema.index({ seller: 1 });              // my listings
-listingSchema.index({ category: 1 });            // filter by category
-listingSchema.index({ createdAt: -1 });          // sort newest first
+// Compound: covers the most common query (college feed, sorted)
+listingSchema.index({ college: 1, status: 1, createdAt: -1 });
+// Category filter within a college
+listingSchema.index({ college: 1, category: 1, createdAt: -1 });
+// Seller's own listings
+listingSchema.index({ seller: 1, createdAt: -1 });
+// Full-text search on title + description
+listingSchema.index({ title: "text", description: "text" });
 
 // ── Virtual: isFree ────────────────────────────────────────
 listingSchema.virtual("isFree").get(function () {

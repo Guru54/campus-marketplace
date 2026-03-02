@@ -1,42 +1,74 @@
-// 1. Core Dependencies
 require('dotenv').config();
-
-const express = require('express');
+const express      = require('express');
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
-const helmet = require('helmet'); // Optional but highly recommended for security
+const cors         = require('cors');
 
-// 2. Database & Config Imports
-const connectDB = require('./src/Config/db');
+const connectDB    = require('./src/config/db');
 
-// 3. Initialize App & Database
+// ── Security Middleware ───────────────────────────────────
+const {
+  helmetMiddleware,
+  sanitizeMiddleware,
+  hppMiddleware,
+} = require('./src/middleware/securityMiddleware');
+
+// ── Error Handler ─────────────────────────────────────────
+const errorMiddleware = require('./src/middleware/errorMiddleware');
+const AppError        = require('./src/utils/AppError');
+
+// ── Routes ────────────────────────────────────────────────
+const authRoutes    = require('./src/routes/authRoutes');
+const listingRoutes = require('./src/routes/listingRoutes');
+const userRoutes    = require('./src/routes/userRoutes');
+const chatRoutes    = require('./src/routes/chatRoutes');
 const app = express();
 connectDB();
 
-// 4. Global Middleware
-app.use(helmet()); // Sets secure HTTP headers
+// ── Security ──────────────────────────────────────────────
+app.use(helmetMiddleware);     // secure HTTP headers
+
+// ── CORS ──────────────────────────────────────────────────
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true // ✅ Essential for JWT Cookies
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-app.use(express.json()); // Parses incoming JSON
-app.use(express.urlencoded({ extended: true })); // Parses URL-encoded bodies
-app.use(cookieParser()); // Parses cookies for Auth
 
-// 5. Routes
-app.get('/', (req, res) => {
-    res.send("API is running...");
+// ── Body Parsers ──────────────────────────────────────────
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
+
+// body parse ke baad sanitize/hpp
+app.use(sanitizeMiddleware);
+app.use(hppMiddleware);
+
+// ── Request Logger (dev) ──────────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    console.log(`📌 ${req.method} ${req.url}`);
+    next();
+  });
+}
+
+// ── Health Check ──────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// app.use('/api/v1/users', require('./src/Routes/userRoutes'));
+// ── API Routes ────────────────────────────────────────────
+app.use('/api/v1/auth',     authRoutes);
+app.use('/api/v1/listings', listingRoutes);
+app.use('/api/v1/users',    userRoutes);
+app.use('/api/v1/chats',    chatRoutes);
 
-// 6. Global Error Handler (Keep this at the very bottom)
-app.use((err, req, res, next) => {
-    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-    res.status(statusCode).json({
-        message: err.message,
-        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-    });
+// ── 404 Handler ───────────────────────────────────────────
+app.use((req, res, next) => {
+  next(new AppError(`Cannot ${req.method} ${req.originalUrl}`, 404));
 });
+
+// ── Global Error Handler ──────────────────────────────────
+app.use(errorMiddleware);
 
 module.exports = app;

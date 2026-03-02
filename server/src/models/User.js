@@ -85,6 +85,19 @@ const userSchema = new mongoose.Schema(
       default: null,
       select: false, // ← internal use only
     },
+
+    // ── Account Lock ──────────────────────────────────────
+    loginAttempts: {
+      type:    Number,
+      default: 0,
+      select:  false,
+    },
+
+    lockUntil: {
+      type:    Date,
+      default: null,
+      select:  false,
+    },
   },
   {
     timestamps: true,
@@ -92,8 +105,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // ── Indexes ────────────────────────────────────────────────
-userSchema.index({ email: 1 },             { unique: true });
 userSchema.index({ college: 1, role: 1 }); // multi-tenant optimization
+
+// ── Instance Method: isLocked ────────────────────────────
+userSchema.methods.isLocked = function () {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+};
 
 // ── Virtual: Full Name ─────────────────────────────────────
 userSchema.virtual("fullName").get(function () {
