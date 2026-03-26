@@ -2,13 +2,12 @@ const http        = require("http");
 const app         = require("./app");
 // Optional Sentry integration (safe require)
 let Sentry;
-console.log("Sentry DSN:", process.env.SENTRY_DSN);
 try {
   Sentry = require('@sentry/node');
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    enabled: true,
-    debug: true, // Enable debug to see Sentry logs in console
+    enabled: process.env.NODE_ENV === 'production', // Only enable in production
+     // Enable debug to see Sentry logs in console
   });
 } catch (e) {
   console.error("Failed to initialize Sentry:", e);
