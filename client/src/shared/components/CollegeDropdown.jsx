@@ -71,7 +71,7 @@ const CollegeDropdown = ({ colleges = [], value, onChange, name }) => {
           border-slate-200 dark:border-white/10
           bg-white dark:bg-slate-900
           shadow-xl dark:shadow-black/40
-          overflow-hidden
+          
         ">
 
           {/* Search */}
@@ -98,10 +98,13 @@ const CollegeDropdown = ({ colleges = [], value, onChange, name }) => {
           </div>
 
           {/* Options List */}
-          <ul className="max-h-52 overflow-y-auto py-1
-            scrollbar-thin scrollbar-thumb-slate-200
-            dark:scrollbar-thumb-white/10"
-          >
+          <ul
+  className="max-h-52 overflow-y-auto py-1 overscroll-contain touch-pan-y   [&::-webkit-scrollbar]:hidden 
+  /* Hide scrollbar for IE, Edge and Firefox */
+  [-ms-overflow-style:none] [scrollbar-width:none]"
+  onWheel={(e) => e.stopPropagation()}
+  onTouchMove={(e) => e.stopPropagation()}
+>
             {filtered.length === 0 ? (
 
               // Empty state

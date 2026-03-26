@@ -323,11 +323,17 @@ const colleges = [
     city:   "Calicut",
     state:  "Kerala",
   },
+  {
+    name: "Baderia Global institute of Engineering and Technology Jabalpur",
+    domai: "global.org.in",
+    city: "jabalpur",
+    state: "Madhya Pradesh"
+  }
 ];
 
 const seedColleges = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI||'mongodb://127.0.0.1:27017/rezell');
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("DB connected");
 
     let added   = 0;

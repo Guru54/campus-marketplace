@@ -62,12 +62,40 @@ const logout = asyncHandler(async (req, res) => {
 // @access  Public
 // ─────────────────────────────────────────────────────────────
 const College = require("../models/College");
-
 const getColleges = asyncHandler(async (req, res) => {
-  const colleges = await College.find({ isActive: true })
-    .select("_id name city state domain")
-    .sort({ name: 1 });
-  sendResponse(res, 200, { colleges });
+  // 1. Get query parameters with defaults
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || "";
+
+  // 2. Build the query object
+  const query = { isActive: true };
+  if (search) {
+    // Basic fuzzy search using case-insensitive regex
+    query.name = { $regex: search, $options: "i" };
+  }
+
+  // 3. Execute query with skip, limit, and lean
+  const skip = (page - 1) * limit;
+  
+  const [colleges, totalColleges] = await Promise.all([
+    College.find(query)
+      .select("_id name city state domain")
+      .sort({ name: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    College.countDocuments(query) // Get total for frontend pagination
+  ]);
+
+  sendResponse(res, 200, {
+    colleges,
+    pagination: {
+      total: totalColleges,
+      page,
+      pages: Math.ceil(totalColleges / limit)
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────

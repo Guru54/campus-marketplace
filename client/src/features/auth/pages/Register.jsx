@@ -11,8 +11,7 @@ import CollegeDropdown from "@/shared/components/CollegeDropdown";
 import { FormSkeleton } from "@/shared/components/skeletons";
 
 const Register = () => {
-  const { data: collegesData, isLoading: collegesLoading } = useCollegesQuery();
-  const colleges = collegesData?.data?.colleges || [];
+   const { data: colleges = [], isLoading: collegesLoading } = useCollegesQuery();
 
   const registerMutation = useRegisterMutation();
 

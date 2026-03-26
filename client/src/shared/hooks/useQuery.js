@@ -263,11 +263,12 @@ export const useChangePasswordMutation = (options = {}) => {
 };
 
 // ── Auth Queries ──────────────────────────────────────
-export const useCollegesQuery = (options = {}) => {
+export const useCollegesQuery = () => {
   return useQuery({
-    queryKey: queryKeys.colleges(),
-    queryFn: () => authAPI.getColleges(),
-    staleTime: 1 * 60 * 60 * 1000, // 1 hour
-    ...options,
+    queryKey: ['colleges'],
+    queryFn: async () => {
+      const res = await authAPI.getColleges();
+      return res.data.data.colleges; // ← unwrap here
+    }
   });
 };

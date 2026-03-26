@@ -1,9 +1,6 @@
-/**
- * Demo Account Seeder
- * Creates 3 verified demo users + sample listings — all at the same college.
- *
- * Run:  node src/seeders/demoSeeder.js
- */
+/*
+ Creates 3 verified demo users + sample listings — all at the same college.
+*/
 
 const mongoose = require("mongoose");
 const bcrypt   = require("bcryptjs");
@@ -106,8 +103,8 @@ const DEMO_LISTINGS = [
 
 // ─────────────────────────────────────────────────────────────
 const seed = async () => {
-  await mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/rezell");
-  console.log("✅  Connected to MongoDB");
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log("Connected to MongoDB");
 
   // ── Find the demo college ────────────────────────────────
   const college = await College.findOne({ name: DEMO_COLLEGE_NAME });
