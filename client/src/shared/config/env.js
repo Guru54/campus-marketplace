@@ -5,7 +5,12 @@
 
 export const env = {
   // API
-  API_BASE_URL: import.meta.env.VITE_APP_BASE_URL || 'http://localhost:5000/api/v1',
+  // Prefer VITE_API_URL (set in client/.env). If provided without path, append `/api/v1`.
+  API_BASE_URL: (() => {
+    const raw = import.meta.env.VITE_API_URL || import.meta.env.VITE_APP_BASE_URL;
+    if (!raw) return 'http://localhost:5000/api/v1';
+    return raw.endsWith('/api') || raw.endsWith('/api/v1') ? raw.replace(/\/?$/, '') : raw.replace(/\/?$/, '') + '/api/v1';
+  })(),
 
   // App
   APP_NAME: import.meta.env.VITE_APP_NAME || 'Campus Marketplace',

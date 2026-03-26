@@ -22,7 +22,8 @@ export const SocketProvider = ({ children }) => {
     }
 
     // Connect (auth via httpOnly cookie — sent automatically)
-    const socket = io("http://localhost:5000", {
+    const socketUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_APP_BASE_URL || 'http://localhost:5000';
+    const socket = io(socketUrl, {
       withCredentials: true,
       autoConnect: true,
       reconnectionAttempts: 5,
