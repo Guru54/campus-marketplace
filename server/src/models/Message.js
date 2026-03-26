@@ -30,6 +30,12 @@ const messageSchema = new mongoose.Schema(
       // unread badge query:
       // countDocuments({ chat, isRead: false, sender: { $ne: userId } })
     },
+
+    // ── Client Message ID for deduplication ──────────────
+    clientId: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

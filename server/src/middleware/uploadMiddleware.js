@@ -43,13 +43,34 @@ const uploadToCloudinary = (buffer, folder) =>
 const uploadListingImages = [
   multerUpload.array("images", 5),
   async (req, res, next) => {
-    if (!req.files || req.files.length === 0) return next();
+    const toArray = (value) => {
+      if (!value) return [];
+      if (Array.isArray(value)) return value.filter(Boolean);
+      return [value].filter(Boolean);
+    };
+
+    const existingImages = toArray(req.body.existingImages);
+
+    if (!req.files || req.files.length === 0) {
+      if (existingImages.length > 0) {
+        req.body.images = existingImages;
+      }
+      delete req.body.existingImages;
+      return next();
+    }
 
     try {
       const urls = await Promise.all(
         req.files.map((f) => uploadToCloudinary(f.buffer, "campus_marketplace/listings"))
       );
-      req.body.images = urls;
+
+      const mergedImages = [...existingImages, ...urls];
+      if (mergedImages.length > 5) {
+        return next(new AppError("Maximum 5 images allowed", 400));
+      }
+
+      req.body.images = mergedImages;
+      delete req.body.existingImages;
       next();
     } catch (err) {
       next(err);

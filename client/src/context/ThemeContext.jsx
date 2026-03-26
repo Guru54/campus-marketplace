@@ -5,19 +5,25 @@ export const ThemeContext = createContext();
 export function ThemeContextProvider({ children }) {
   const [theme, setTheme] = useState("dark");
 
+  const applyTheme = (newTheme) => {
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(newTheme);
+  };
+
   useEffect(() => {
-    const storedTheme = localStorage.getItem("theme");
-    if (storedTheme) {
-      setTheme(storedTheme);
-      document.documentElement.classList.add(storedTheme);
-    } else {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
+    const storedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(storedTheme);
+    applyTheme(storedTheme);
   }, []);
 
+  const setThemeWithPersist = (newTheme) => {
+    localStorage.setItem("theme", newTheme);
+    setTheme(newTheme);
+    applyTheme(newTheme);
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: setThemeWithPersist }}>
       {children}
     </ThemeContext.Provider>
   );

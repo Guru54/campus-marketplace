@@ -18,9 +18,9 @@ const register = asyncHandler(async (req, res) => {
   const result = await authService.register(req.body, req.ip);
 
   if (result.resent)
-    return sendResponse(res, 200, null, "OTP resent. Please verify your email.");
+    return sendResponse(res, 200, { email: req.body.email }, "OTP resent. Please verify your email.");
 
-  sendResponse(res, 201, { userId: result.userId },
+  sendResponse(res, 201, { userId: result.userId, email: req.body.email },
     "Registration successful. Please verify your email.");
 });
 
@@ -57,6 +57,23 @@ const logout = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/auth/me
 // @access  Private
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// @route   GET /api/v1/auth/colleges
+// @access  Public
+// ─────────────────────────────────────────────────────────────
+const College = require("../models/College");
+
+const getColleges = asyncHandler(async (req, res) => {
+  const colleges = await College.find({ isActive: true })
+    .select("_id name city state domain")
+    .sort({ name: 1 });
+  sendResponse(res, 200, { colleges });
+});
+
+// ─────────────────────────────────────────────────────────────
+// @route   GET /api/v1/auth/me
+// @access  Private
+// ─────────────────────────────────────────────────────────────
 const getMe = asyncHandler(async (req, res) => {
   const { _id, firstName, lastName, email, role, college,
           avatar, avatarUrl, isOnline, lastSeen, createdAt } = req.user;
@@ -67,4 +84,4 @@ const getMe = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, verifyOTP, login, logout, getMe };
+module.exports = { register, verifyOTP, login, logout, getMe, getColleges };

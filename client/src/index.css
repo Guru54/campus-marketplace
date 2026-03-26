@@ -1,7 +1,35 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode (ThemeContext toggles .dark on <html>) */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Enable class-based dark mode (ThemeContext toggles .dark on <html>) */
+@layer base {
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/* ── Custom Animations ─────────────────────────────────────── */
+@layer utilities {
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 1.5s infinite;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 @layer base {
   body {

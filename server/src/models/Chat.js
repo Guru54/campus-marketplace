@@ -65,13 +65,13 @@ const chatSchema = new mongoose.Schema(
 // ── Pre-save Hook ──────────────────────────────────────────
 // Sort participants before save
 // Guarantees [A,B] and [B,A] treated as same
-chatSchema.pre("save", function (next) {
+// Note: Mongoose 7+ pre-hooks use async — no `next` callback
+chatSchema.pre("save", async function () {
   if (this.isModified("participants")) {
     this.participants.sort((a, b) =>
       a.toString().localeCompare(b.toString())
     );
   }
-  next();
 });
 
 // ── Indexes ──────────────────────────���─────────────────────

@@ -37,7 +37,7 @@ const startChat = async (data, buyer) => {
   }
 
   await chat.populate([
-    { path: "participants", select: "firstName lastName avatarUrl isOnline lastSeen" },
+    { path: "participants", select: "firstName lastName avatar isOnline lastSeen" },
     { path: "listing",      select: "title price images status" },
   ]);
 
@@ -52,10 +52,10 @@ const getMyChats = async (user) => {
     participants: user._id,
     deletedBy:    { $ne: user._id },
   })
-    .populate("participants", "firstName lastName avatarUrl isOnline lastSeen")
+    .populate("participants", "firstName lastName avatar isOnline lastSeen")
     .populate("listing",      "title price images status")
     .sort({ lastMessageAt: -1 })
-    .lean();
+    .lean({ virtuals: true });
 
   // Attach unread count per chat
   const chatsWithUnread = await Promise.all(
@@ -81,18 +81,20 @@ const getMessages = async (chatId, query, user) => {
     _id:          chatId,
     participants: user._id,
     deletedBy:    { $ne: user._id },
-  });
+  })
+    .populate("participants", "firstName lastName avatar isOnline lastSeen")
+    .populate("listing", "title price images status");
   if (!chat) throw new AppError("Chat not found", 404);
 
   const { skip, limit: lim, page: pg } = paginate(query.page, query.limit || 30);
 
   const [messages, total] = await Promise.all([
     Message.find({ chat: chatId })
-      .populate("sender", "firstName lastName avatarUrl")
+      .populate("sender", "firstName lastName avatar")
       .sort({ createdAt: 1 })
       .skip(skip)
       .limit(lim)
-      .lean(),
+      .lean({ virtuals: true }),
 
     Message.countDocuments({ chat: chatId }),
   ]);
@@ -138,7 +140,7 @@ const sendMessage = async (chatId, content, sender) => {
   chat.lastMessageAt = new Date();
   await chat.save();
 
-  await message.populate("sender", "firstName lastName avatarUrl");
+  await message.populate("sender", "firstName lastName avatar");
 
   return message;
 };

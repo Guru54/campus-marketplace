@@ -64,6 +64,7 @@ const initSocket = (httpServer) => {
         if (!chat) return socket.emit("error", { message: "Chat not found" });
 
         socket.join(chatId);
+        console.log("User joined room:", chatId); // Debug log
         socket.emit("joined_chat", { chatId });
       } catch (err) {
         socket.emit("error", { message: "Could not join chat" });
@@ -77,7 +78,7 @@ const initSocket = (httpServer) => {
 
     // ── Send Message ──────────────────────────────────────
     // Client emits: { chatId, content }
-    socket.on("send_message", async ({ chatId, content }) => {
+    socket.on("send_message", async ({ chatId, content, clientId }) => {
       try {
         if (!content?.trim() || content.length > 1000)
           return socket.emit("error", { message: "Invalid message" });
@@ -88,11 +89,12 @@ const initSocket = (httpServer) => {
         });
         if (!chat) return socket.emit("error", { message: "Chat not found" });
 
-        // Save message
+        // Save message, include clientId if provided
         const message = await Message.create({
           chat:    chatId,
           sender:  user._id,
           content: content.trim(),
+          ...(clientId ? { clientId } : {})
         });
 
         // Update chat preview
@@ -100,18 +102,27 @@ const initSocket = (httpServer) => {
         chat.lastMessageAt = new Date();
         await chat.save();
 
-        await message.populate("sender", "firstName lastName avatarUrl");
+        await message.populate("sender", "firstName lastName avatar");
+        // Convert to plain object so clientId survives serialization
+        const messageObj = message.toObject();
+        if (clientId) messageObj.clientId = clientId;
 
-        // Emit to everyone in the room (including sender)
-        io.to(chatId).emit("new_message", message);
+        // Emit plain object, not the Mongoose document, and include chatId and clientId
+        io.to(chatId).emit("new_message", {
+          ...messageObj,
+          chatId,
+          clientId
+        });
 
         // Push inbox update to the other participant (who may not be in room)
         const otherId = chat.participants.find(
           (p) => p.toString() !== user._id.toString()
         );
-        const otherUser = await User.findById(otherId).select("socketId");
-        if (otherUser?.socketId) {
-          io.to(otherUser.socketId).emit("inbox_update", {
+        // Fast socket lookup instead of DB query
+        const otherSocket = [...io.sockets.sockets.values()]
+          .find(s => s.user && s.user._id.toString() === otherId.toString());
+        if (otherSocket) {
+          io.to(otherSocket.id).emit("inbox_update", {
             chatId,
             lastMessage:   chat.lastMessage,
             lastMessageAt: chat.lastMessageAt,
@@ -123,8 +134,22 @@ const initSocket = (httpServer) => {
     });
 
     // ── Typing Indicators ─────────────────────────────────
-    socket.on("typing",      ({ chatId }) => socket.to(chatId).emit("typing",      { userId: user._id }));
-    socket.on("stop_typing", ({ chatId }) => socket.to(chatId).emit("stop_typing", { userId: user._id }));
+    socket.on("typing", ({ chatId }) => {
+      socket.to(chatId).emit("typing", {
+        userId: user._id,
+        typingChatId: chatId
+      });
+    });
+    socket.on("stop_typing", ({ chatId }) => {
+      socket.to(chatId).emit("stop_typing", {
+        userId: user._id,
+        typingChatId: chatId
+      });
+    });
+    // ── Debug: Log all events ───────────────
+    socket.onAny((event, ...args) => {
+      console.log("EVENT:", event, args);
+    });
 
     // ── Mark Messages Read ────────────────────────────────
     // Client emits: { chatId }

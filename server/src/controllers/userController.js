@@ -22,6 +22,7 @@ const updateProfile = asyncHandler(async (req, res) => {
       _id:       user._id,
       firstName: user.firstName,
       lastName:  user.lastName,
+      avatar:    user.avatar,
       avatarUrl: user.avatarUrl,
     },
   }, "Profile updated successfully");

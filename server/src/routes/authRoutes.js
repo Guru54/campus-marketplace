@@ -7,6 +7,7 @@ const {
   login,
   logout,
   getMe,
+  getColleges,
 } = require("../controllers/authController");
 
 const { protect }                 = require("../middleware/authMiddleware");
@@ -20,6 +21,8 @@ const {
 } = require("../validations/auth.validation");
 
 // ── Public Routes ──────────────────────────────────────────
+router.get("/colleges", getColleges);
+
 router.post("/register",
   authLimiter,
   validate(registerSchema),

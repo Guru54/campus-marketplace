@@ -1,31 +1,60 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { authAPI } from "@/shared/services/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("rezell_user");
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData, token) => {
+  useEffect(() => {
+    let isMounted = true;
+
+    const bootstrapAuth = async () => {
+      try {
+        const stored = localStorage.getItem("rezell_user");
+        if (!stored) return;
+
+        const parsedUser = JSON.parse(stored);
+        if (!isMounted) return;
+
+        setUser(parsedUser);
+
+        // Validate cookie-based session; clear stale local user if session expired.
+        await authAPI.getMe();
+      } catch {
+        if (!isMounted) return;
+        localStorage.removeItem("rezell_user");
+        setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    if (!localStorage.getItem("rezell_user")) {
+      setLoading(false);
+    } else {
+      bootstrapAuth();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Token lives in httpOnly cookie — we only cache user info in localStorage
+  const login = (userData) => {
     localStorage.setItem("rezell_user", JSON.stringify(userData));
-    localStorage.setItem("rezell_token", token);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem("rezell_user");
-    localStorage.removeItem("rezell_token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

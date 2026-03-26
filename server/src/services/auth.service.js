@@ -25,6 +25,7 @@ const formatUser = (user) => ({
   email:     user.email,
   role:      user.role,
   college:   user.college,
+  avatar:    user.avatar,
   avatarUrl: user.avatarUrl,
 });
 

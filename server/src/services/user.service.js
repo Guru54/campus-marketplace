@@ -10,7 +10,7 @@ const getProfile = async (userId, requestingUser) => {
     _id:     userId,
     college: requestingUser.college, // college-scoped: only same college
   })
-    .select("firstName lastName avatarUrl isOnline lastSeen createdAt college role")
+    .select("firstName lastName avatar isOnline lastSeen createdAt college role")
     .populate("college", "name city state")
     .lean({ virtuals: true });
 

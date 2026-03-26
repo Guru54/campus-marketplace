@@ -121,7 +121,7 @@ userSchema.virtual("fullName").get(function () {
 userSchema.virtual("avatarUrl").get(function () {
   if (this.avatar) return this.avatar;
   const seed = encodeURIComponent(`${this.firstName} ${this.lastName}`);
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=6366f1&fontFamily=Inter&fontSize=40&fontWeight=600`;
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`;
 });
 
 // ── toJSON ─────────────────────────────────────────────────

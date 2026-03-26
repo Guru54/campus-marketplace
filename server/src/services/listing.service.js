@@ -43,7 +43,7 @@ const getListings = async (query, collegeId) => {
   const [listings, total] = await Promise.all([
     Listing.find(filter)
       .select("title price images category condition isNegotiable isFree seller createdAt")
-      .populate("seller", "firstName lastName avatarUrl")
+      .populate("seller", "firstName lastName avatar")
       .sort(SORT_MAP[sort] || SORT_MAP.newest)
       .skip(skip)
       .limit(lim)
@@ -70,7 +70,7 @@ const getListings = async (query, collegeId) => {
 // ─────────────────────────────────────────────────────────────
 const getListingById = async (listingId, collegeId) => {
   const listing = await Listing.findOne({ _id: listingId, college: collegeId })
-    .populate("seller", "firstName lastName avatarUrl isOnline lastSeen college")
+    .populate("seller", "firstName lastName avatar isOnline lastSeen college")
     .populate("college", "name city state");
 
   if (!listing) throw new AppError("Listing not found", 404);

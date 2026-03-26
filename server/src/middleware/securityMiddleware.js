@@ -1,19 +1,18 @@
 const helmet        = require("helmet");
 const rateLimit     = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
-const hpp           = require("hpp");
 
-// ── Helmet ─────────────────────────────────────────────────────
+// ── Helmet ──────────────────────────────────────────────
 // Sets secure HTTP headers (XSS, clickjacking, MIME sniffing, etc.)
 const helmetMiddleware = helmet();
 
-// ── Mongo Sanitize ─────────────────────────────────────────────
-// Strips keys starting with $ or containing . from req.body/params/query
-const sanitizeMiddleware = mongoSanitize();
-
-// ── HPP ────────────────────────────────────────────────────────
-// Protect against HTTP Parameter Pollution attacks
-const hppMiddleware = hpp();
+// ── Mongo Sanitize ──────────────────────────────────────
+// Sanitize only req.body and req.params — skip req.query (getter-only in Express 5)
+const sanitizeMiddleware = (req, res, next) => {
+  if (req.body)   mongoSanitize.sanitize(req.body);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  next();
+};
 
 // ── Rate Limiters ──────────────────────────────────────────────
 const authLimiter = rateLimit({
@@ -41,7 +40,6 @@ const otpLimiter = rateLimit({
 module.exports = {
   helmetMiddleware,
   sanitizeMiddleware,
-  hppMiddleware,
   authLimiter,
   otpLimiter,
 };
