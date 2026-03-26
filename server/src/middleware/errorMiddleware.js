@@ -53,6 +53,16 @@ const errorMiddleware = (err, req, res, next) => {
   if (error.name === "JsonWebTokenError") error = handleJWTError();
   if (error.name === "TokenExpiredError") error = handleJWTExpired();
 
+  // Capture exception in Sentry if available (do not crash if Sentry not installed)
+  try {
+    const Sentry = require('@sentry/node');
+    if (Sentry && process.env.SENTRY_DSN) {
+      Sentry.captureException(err);
+    }
+  } catch (_) {
+    // ignore if Sentry not installed
+  }
+
   sendError(error, res);
 };
 

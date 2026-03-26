@@ -334,7 +334,8 @@ const colleges = [
 const seedColleges = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("DB connected");
+    const logger = require('../utils/logger');
+    logger.log("DB connected");
 
     let added   = 0;
     let updated = 0;
@@ -347,20 +348,20 @@ const seedColleges = async () => {
       );
 
       if (result.upsertedCount > 0) {
-        console.log(`Added:   ${college.name}`);
+        logger.log(`Added:   ${college.name}`);
         added++;
       } else {
-        console.log(`Updated: ${college.name}`);
+        logger.log(`Updated: ${college.name}`);
         updated++;
       }
     }
 
-    console.log("\n─────────────────────────────────");
-    console.log(`Seeding complete!`);
-    console.log(`Added:   ${added} colleges`);
-    console.log(` Updated: ${updated} colleges`);
-    console.log(`Total:   ${colleges.length} colleges`);
-    console.log("─────────────────────────────────");
+    logger.log("\n─────────────────────────────────");
+    logger.log(`Seeding complete!`);
+    logger.log(`Added:   ${added} colleges`);
+    logger.log(` Updated: ${updated} colleges`);
+    logger.log(`Total:   ${colleges.length} colleges`);
+    logger.log("─────────────────────────────────");
     process.exit(0);
 
   } catch (error) {

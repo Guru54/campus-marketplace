@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@sentry/node": "^10.46.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
@@ -20,7 +21,7 @@
     "streamifier": "^0.1.1"
   },
   "devDependencies": {
-    "prettier": "^3.8.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.1"
   }
 }

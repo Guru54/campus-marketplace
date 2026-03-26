@@ -8,6 +8,8 @@ const dotenv   = require("dotenv");
 
 dotenv.config();
 
+const logger = require('../utils/logger');
+
 const User    = require("../models/User");
 const College = require("../models/College");
 const Listing = require("../models/Listing");
@@ -104,7 +106,7 @@ const DEMO_LISTINGS = [
 // ─────────────────────────────────────────────────────────────
 const seed = async () => {
   await mongoose.connect(process.env.MONGO_URI);
-  console.log("Connected to MongoDB");
+  logger.log("Connected to MongoDB");
 
   // ── Find the demo college ────────────────────────────────
   const college = await College.findOne({ name: DEMO_COLLEGE_NAME });
@@ -112,7 +114,7 @@ const seed = async () => {
     console.error(`❌  College "${DEMO_COLLEGE_NAME}" not found.\n    Run the college seeder first: node src/seeders/collegeSeeders.js`);
     process.exit(1);
   }
-  console.log(`🏫  College: ${college.name} (${college.city})`);
+  logger.log(`🏫  College: ${college.name} (${college.city})`);
 
   const hashedPassword = await bcrypt.hash(DEMO_PASSWORD, 12);
   const createdUsers   = [];
@@ -122,7 +124,7 @@ const seed = async () => {
     let user = await User.findOne({ email: u.email });
 
     if (user) {
-      console.log(`👤  User already exists: ${u.email}`);
+      logger.log(`👤  User already exists: ${u.email}`);
     } else {
       user = await User.create({
         ...u,
@@ -131,7 +133,7 @@ const seed = async () => {
         isVerified: true,          // skip OTP for demo accounts
         role:       u.role,
       });
-      console.log(`✅  Created user: ${u.firstName} ${u.lastName} <${u.email}>`);
+      logger.log(`✅  Created user: ${u.firstName} ${u.lastName} <${u.email}>`);
     }
 
     createdUsers.push(user);
@@ -141,7 +143,7 @@ const seed = async () => {
   const demoUserIds = createdUsers.map((u) => u._id);
   const deleted     = await Listing.deleteMany({ seller: { $in: demoUserIds } });
   if (deleted.deletedCount > 0)
-    console.log(`🗑️   Removed ${deleted.deletedCount} old demo listing(s)`);
+    logger.log(`🗑️   Removed ${deleted.deletedCount} old demo listing(s)`);
 
   // ── Create demo listings ─────────────────────────────────
   for (const l of DEMO_LISTINGS) {
@@ -158,22 +160,11 @@ const seed = async () => {
       seller:       seller._id,
       college:      college._id,
     });
-    console.log(`📦  Listing created: "${l.title}" by ${seller.firstName}`);
+    logger.log(`📦  Listing created: "${l.title}" by ${seller.firstName}`);
   }
 
   // ── Summary ──────────────────────────────────────────────
-  console.log(`
-╔═══════════════════════════════════════════════════════╗
-║              DEMO ACCOUNTS READY                      ║
-╠═══════════════════════════════════════════════════════╣
-║  College : ${college.name.padEnd(43)}║
-║  Password: ${DEMO_PASSWORD.padEnd(43)}║
-╠═══════════════════════════════════════════════════════╣
-║  arjun.demo@rezell.dev  → Arjun Sharma                ║
-║  priya.demo@rezell.dev  → Priya Patel                 ║
-║  rahul.demo@rezell.dev  → Rahul Mehta                 ║
-╚═══════════════════════════════════════════════════════╝
-`);
+  logger.log(`\n╔═══════════════════════════════════════════════════════╗\n║              DEMO ACCOUNTS READY                      ║\n╠═══════════════════════════════════════════════════════╣\n║  College : ${college.name.padEnd(43)}║\n║  Password: ${DEMO_PASSWORD.padEnd(43)}║\n╠═══════════════════════════════════════════════════════╣\n║  arjun.demo@rezell.dev  → Arjun Sharma                ║\n║  priya.demo@rezell.dev  → Priya Patel                 ║\n║  rahul.demo@rezell.dev  → Rahul Mehta                 ║\n╚═══════════════════════════════════════════════════════╝\n`);
 
   await mongoose.disconnect();
   process.exit(0);

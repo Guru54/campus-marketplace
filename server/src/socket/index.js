@@ -42,7 +42,8 @@ const initSocket = (httpServer) => {
 
   io.on("connection", async (socket) => {
     const user = socket.user;
-    console.log(`🔌 Connected: ${user.firstName} ${user.lastName} [${socket.id}]`);
+    const logger = require('../utils/logger');
+    logger.log(`🔌 Connected: ${user.firstName} ${user.lastName} [${socket.id}]`);
 
     // ── Mark user online ─────────────────────────────────
     await User.findByIdAndUpdate(user._id, {
@@ -64,7 +65,7 @@ const initSocket = (httpServer) => {
         if (!chat) return socket.emit("error", { message: "Chat not found" });
 
         socket.join(chatId);
-        console.log("User joined room:", chatId); // Debug log
+        logger.log("User joined room:", chatId); // Debug log
         socket.emit("joined_chat", { chatId });
       } catch (err) {
         socket.emit("error", { message: "Could not join chat" });
@@ -146,9 +147,9 @@ const initSocket = (httpServer) => {
         typingChatId: chatId
       });
     });
-    // ── Debug: Log all events ───────────────
+    // ── Event logging (controlled by logger) ─
     socket.onAny((event, ...args) => {
-      console.log("EVENT:", event, args);
+      logger.log("EVENT:", event, args);
     });
 
     // ── Mark Messages Read ────────────────────────────────
@@ -167,7 +168,7 @@ const initSocket = (httpServer) => {
 
     // ── Disconnect ────────────────────────────────────────
     socket.on("disconnect", async () => {
-      console.log(`🔌 Disconnected: ${user.firstName} ${user.lastName}`);
+      logger.log(`🔌 Disconnected: ${user.firstName} ${user.lastName}`);
 
       await User.findByIdAndUpdate(user._id, {
         isOnline: false,

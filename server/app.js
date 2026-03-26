@@ -53,8 +53,9 @@ app.use(sanitizeMiddleware);
 
 // ── Request Logger (dev) ──────────────────────────────────
 if (process.env.NODE_ENV !== 'production') {
+  const logger = require('./src/utils/logger');
   app.use((req, res, next) => {
-    console.log(`📌 ${req.method} ${req.url}`);
+    logger.log(`📌 ${req.method} ${req.url}`);
     next();
   });
 }
@@ -69,7 +70,9 @@ app.use('/api/v1/auth',     authRoutes);
 app.use('/api/v1/listings', listingRoutes);
 app.use('/api/v1/users',    userRoutes);
 app.use('/api/v1/chats',    chatRoutes);
-
+app.get("/debug-sentry", (req, res) => {
+  throw new Error("Sentry test error — delete this route!");
+});
 // ── 404 Handler ───────────────────────────────────────────
 app.use((req, res, next) => {
   next(new AppError(`Cannot ${req.method} ${req.originalUrl}`, 404));

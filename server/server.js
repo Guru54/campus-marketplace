@@ -1,9 +1,25 @@
 const http        = require("http");
 const app         = require("./app");
+// Optional Sentry integration (safe require)
+let Sentry;
+console.log("Sentry DSN:", process.env.SENTRY_DSN);
+try {
+  Sentry = require('@sentry/node');
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    enabled: true,
+    debug: true, // Enable debug to see Sentry logs in console
+  });
+} catch (e) {
+  console.error("Failed to initialize Sentry:", e);
+  // Sentry not installed or failed to init — continue without it
+}
+
 const initSocket  = require("./src/socket/index");
 
 const PORT   = process.env.PORT || 5000;
 const server = http.createServer(app);
+const logger = require('./src/utils/logger');
 
 // socket.io setup
 const io = initSocket(server);
@@ -12,15 +28,15 @@ const io = initSocket(server);
 app.set("io", io);
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
-  console.log(`Socket.io ready`);
+  logger.log(`Server running on port ${PORT} [${process.env.NODE_ENV || "development"}]`);
+  logger.log(`Socket.io ready`);
 });
 
 // Graceful shutdown
 const shutdown = (signal) => {
-  console.log(`\n${signal} received. Closing server...`);
+  logger.log(`\n${signal} received. Closing server...`);
   server.close(() => {
-    console.log("HTTP server closed.");
+    logger.log("HTTP server closed.");
     process.exit(0);
   });
   setTimeout(() => {
@@ -34,5 +50,6 @@ process.on("SIGINT",  () => shutdown("SIGINT"));
 
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err.message);
+   if (Sentry) Sentry.captureException(err);
   shutdown("unhandledRejection");
 });
