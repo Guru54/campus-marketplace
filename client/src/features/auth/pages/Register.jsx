@@ -64,9 +64,7 @@ const Register = () => {
 
   const strength = getStrength(form.values.password);
 
-  return collegesLoading ? (
-    <AuthLayout><FormSkeleton /></AuthLayout>
-  ) : (
+  return (
     <AuthLayout>
       <motion.div
         initial={{ opacity: 0, y: 32 }}
@@ -118,10 +116,17 @@ const Register = () => {
   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
     College
   </label>
-  <CollegeDropdown
-    colleges={colleges}
-    {...form.getFieldProps("collegeId")}
-  />
+  {collegesLoading ? (
+    <div className="w-full h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg flex items-center px-4 text-xs text-slate-400">
+      Loading colleges...
+    </div>
+  ) : (
+    <CollegeDropdown
+      colleges={colleges}
+      {...form.getFieldProps("collegeId")}
+    />
+  )}
+
   {form.getFieldMeta("collegeId").isError && <p className="text-red-500 text-xs mt-1">{form.errors.collegeId}</p>}
 </div>
 
