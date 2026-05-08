@@ -58,7 +58,11 @@ const register = async (data, ip) => {
       existingUser.otp       = otp;
       existingUser.otpExpiry = otpExpiry;
       await existingUser.save();
-      await sendOTPEmail(email, existingUser.firstName, otp);
+      try {
+  await sendOTPEmail(email, existingUser.firstName, otp);
+} catch (err) {
+  console.error("Resend OTP failed:", err.message);
+}
 
       return { resent: true };
     }
@@ -77,7 +81,11 @@ const register = async (data, ip) => {
     otp, otpExpiry,
   });
 
+ try {
   await sendOTPEmail(email, firstName, otp);
+} catch (err) {
+  console.error("OTP email failed:", err.message);
+}
 
   // ── 5. Audit ─────────────────────────────────────────────
   await AuditLog.create({ action: "REGISTER", user: user._id, ip });

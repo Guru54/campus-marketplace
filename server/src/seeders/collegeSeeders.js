@@ -325,7 +325,13 @@ const colleges = [
   },
   {
     name: "Baderia Global institute of Engineering and Technology Jabalpur",
-    domai: "global.org.in",
+    domain: "global.org.in",
+    city: "jabalpur",
+    state: "Madhya Pradesh"
+  },
+  {
+    name: "Gyan Ganga College of Technology Jabalpur",
+    domain: "ggct.co.in",
     city: "jabalpur",
     state: "Madhya Pradesh"
   }
@@ -333,7 +339,7 @@ const colleges = [
 
 const seedColleges = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect("");
     const logger = require('../utils/logger');
     logger.log("DB connected");
 
