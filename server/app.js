@@ -3,6 +3,8 @@ const express      = require('express');
 const cookieParser = require('cookie-parser');
 const cors         = require('cors');
 
+app.set('trust proxy', 1);
+
 const connectDB    = require('./src/config/db');
 
 // ── Security Middleware ───────────────────────────────────

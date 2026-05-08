@@ -9,15 +9,23 @@ import { featuresData } from "@/data/featuresData";
 import { faqsData } from "@/data/faqsData";
 import { collegesData } from "@/data/collegesData";
 
-//  FAQ Accordion 
+//  FAQ Accordion
 const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState(null);
+
   const { theme } = useThemeContext();
   return (
-    <div id="faq" className="relative max-w-2xl mx-auto flex flex-col items-center justify-center px-4 md:px-0">
+    <div
+      id="faq"
+      className="relative max-w-2xl mx-auto flex flex-col items-center justify-center px-4 md:px-0"
+    >
       <img
         className="absolute -mb-120 -left-40 -z-10 pointer-events-none"
-        src={theme === "dark" ? "/assets/color-splash.svg" : "/assets/color-splash-light.svg"}
+        src={
+          theme === "dark"
+            ? "/assets/color-splash.svg"
+            : "/assets/color-splash-light.svg"
+        }
         alt=""
         width={1000}
         height={1000}
@@ -57,7 +65,7 @@ const FaqSection = () => {
   );
 };
 
-//  Home Page 
+//  Home Page
 export default function Home() {
   const { theme } = useThemeContext();
 
@@ -65,7 +73,6 @@ export default function Home() {
     <>
       {/*  HERO  */}
       <div className="flex flex-col items-center justify-center text-center px-4 min-h-screen pt-24 bg-[url('/assets/light-hero-gradient.svg')] dark:bg-[url('/assets/dark-hero-gradient.svg')] bg-no-repeat bg-cover">
-
         {/* Social proof badge */}
         <div className="flex flex-wrap items-center justify-center gap-3 p-1.5 pr-4 rounded-full border border-slate-300 dark:border-slate-600 bg-white/70 dark:bg-slate-600/20">
           <div className="flex items-center -space-x-2">
@@ -74,17 +81,24 @@ export default function Home() {
               "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=50",
               "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=50&h=50&auto=format&fit=crop",
             ].map((src, i) => (
-              <img key={i} className="size-7 rounded-full ring-2 ring-white dark:ring-black" src={src} alt="student" />
+              <img
+                key={i}
+                className="size-7 rounded-full ring-2 ring-white dark:ring-black"
+                src={src}
+                alt="student"
+              />
             ))}
           </div>
-          
-                                         <div className="relative flex h-3.5 w-3.5 items-center justify-center">
-                                        <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping duration-300" />
 
-                                        <span className="relative inline-flex size-2 rounded-full bg-green-600" />
-                                    </div>
-                                     <p className="text-xs text-slate-600 dark:text-slate-300"> Trusted by 1,000+ campus students </p>
-          
+          <div className="relative flex h-3.5 w-3.5 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping duration-300" />
+
+            <span className="relative inline-flex size-2 rounded-full bg-green-600" />
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-300">
+            {" "}
+            Trusted by 1,000+ campus students{" "}
+          </p>
         </div>
 
         {/* Headline */}
@@ -98,8 +112,8 @@ export default function Home() {
         {/* Subtext */}
         <p className="text-base text-slate-600 dark:text-slate-300 max-w-lg mt-4">
           Rezell is a campus-exclusive resale network. Buy second-hand books,
-          gadgets, and furniture from verified students at your own college 
-          with enforced trust, not assumed.
+          gadgets, and furniture from verified students at your own college with
+          enforced trust, not assumed.
         </p>
 
         {/* CTA buttons */}
@@ -114,7 +128,7 @@ export default function Home() {
             to="/listings"
             className="flex items-center gap-2 border border-indigo-900 text-slate-700 dark:text-white rounded-md px-7 h-11 transition hover:border-indigo-500"
           >
-            Browse Listings 
+            Browse Listings
           </Link>
         </div>
 
@@ -127,7 +141,7 @@ export default function Home() {
 
         {/* College marquee */}
         <h3 className="text-sm text-center text-slate-400 mt-24 pb-6 font-medium">
-          Building trust across campuses, including 
+          Building trust across campuses, including
         </h3>
         <Marquee
           className="max-w-4xl mx-auto"
@@ -169,9 +183,14 @@ export default function Home() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: i * 0.08, ease: "easeOut" }}
             >
-              <feature.icon className="text-indigo-500 size-8 mt-4" strokeWidth={1.3} />
+              <feature.icon
+                className="text-indigo-500 size-8 mt-4"
+                strokeWidth={1.3}
+              />
               <h3 className="text-base font-medium">{feature.title}</h3>
-              <p className="text-slate-400 text-sm line-clamp-2">{feature.description}</p>
+              <p className="text-slate-400 text-sm line-clamp-2">
+                {feature.description}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -225,7 +244,9 @@ export default function Home() {
 
       {/*  FINAL CTA  */}
       <div className="flex flex-col items-center text-center justify-center mt-28 mb-10 px-4">
-        <h3 className="text-3xl font-semibold mt-16 mb-4">Ready to trade smarter?</h3>
+        <h3 className="text-3xl font-semibold mt-16 mb-4">
+          Ready to trade smarter?
+        </h3>
         <p className="text-slate-600 dark:text-slate-300 max-w-xl mx-auto">
           Join your campus network. Buy trusted. Sell fast. Rezell.
         </p>
