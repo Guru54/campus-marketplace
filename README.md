@@ -95,7 +95,7 @@ Indian college students rely on scattered, unsafe channels for campus commerce:
 </div>
 
 > 💡 **Demo GIF** — 
-![Rezell Demo](client/public/docs/demo.gif) 
+![Rezell Demo](client/public/docs/de.gif) 
 
 ---
 
