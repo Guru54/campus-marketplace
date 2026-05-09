@@ -13,7 +13,7 @@ const updateProfileSchema = Joi.object({
   }),
 
   // avatar comes from upload middleware as a URL
-  avatar: Joi.string().uri().allow(""),
+  avatar: Joi.string().uri().allow("").optional(),
 }).min(1).messages({
   "object.min": "Provide at least one field to update",
 });

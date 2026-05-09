@@ -31,9 +31,23 @@ const socketAuth = async (socket, next) => {
 
 // ─────────────────────────────────────────────────────────────
 const initSocket = (httpServer) => {
+
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "https://campus-marketplace-hazel.vercel.app",
+  ];
+
   const io = new Server(httpServer, {
     cors: {
-      origin:      process.env.FRONTEND_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`Socket CORS blocked: ${origin}`));
+        }
+      },
       credentials: true,
     },
   });
@@ -50,6 +64,9 @@ const initSocket = (httpServer) => {
       isOnline: true,
       socketId: socket.id,
     });
+
+    // Join personal room for user-specific events (e.g., inbox_update across tabs)
+    socket.join(user._id.toString());
 
     // Broadcast online status to same-college users
     socket.broadcast.emit("user_online", { userId: user._id });
@@ -119,11 +136,8 @@ const initSocket = (httpServer) => {
         const otherId = chat.participants.find(
           (p) => p.toString() !== user._id.toString()
         );
-        // Fast socket lookup instead of DB query
-        const otherSocket = [...io.sockets.sockets.values()]
-          .find(s => s.user && s.user._id.toString() === otherId.toString());
-        if (otherSocket) {
-          io.to(otherSocket.id).emit("inbox_update", {
+        if (otherId) {
+          io.to(otherId.toString()).emit("inbox_update", {
             chatId,
             lastMessage:   chat.lastMessage,
             lastMessageAt: chat.lastMessageAt,
@@ -135,18 +149,33 @@ const initSocket = (httpServer) => {
     });
 
     // ── Typing Indicators ─────────────────────────────────
-    socket.on("typing", ({ chatId }) => {
-      socket.to(chatId).emit("typing", {
-        userId: user._id,
-        typingChatId: chatId
-      });
-    });
-    socket.on("stop_typing", ({ chatId }) => {
-      socket.to(chatId).emit("stop_typing", {
-        userId: user._id,
-        typingChatId: chatId
-      });
-    });
+socket.on("typing", ({ chatId }) => {
+
+  socket.to(chatId).emit("typing", {
+
+   userId: user._id,
+    typingChatId: chatId,
+
+    user: {
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar,
+      profilePicture: user.profilePicture,
+    },
+
+  });
+
+});
+socket.on("stop_typing", ({ chatId }) => {
+
+  socket.to(chatId).emit("stop_typing", {
+userId: user._id,
+    typingChatId: chatId
+
+  });
+
+});
     // ── Event logging (controlled by logger) ─
     socket.onAny((event, ...args) => {
       logger.log("EVENT:", event, args);

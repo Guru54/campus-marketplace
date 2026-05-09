@@ -238,7 +238,7 @@ export const EditListingModal = ({ listing, onClose, onSaved }) => {
                 name="condition"
                 value={form.condition}
                 onChange={handleChange}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                className="cursor-pointer w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {CONDITIONS.map(({ value, label }) => (
                   <option key={value} value={value}>
@@ -253,7 +253,7 @@ export const EditListingModal = ({ listing, onClose, onSaved }) => {
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                className="cursor-pointer w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>

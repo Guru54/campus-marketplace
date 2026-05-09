@@ -141,13 +141,38 @@ const ChatWindow = () => {
     };
     const onTyping      = ({ userId }) => { if (userId !== user._id) setIsTyping(true);  };
     const onStopTyping  = ({ userId }) => { if (userId !== user._id) setIsTyping(false); };
-    const onMessagesRead = () => {
-      setMessages((prev) => prev.map((m) => m.sender?._id === user._id ? { ...m, isRead: true } : m));
+    const onMessagesRead = ({ chatId: readChatId, messageIds }) => {
+      // If server emits read event for this chat
+      if (readChatId === chatId || !readChatId) {
+        if (Array.isArray(messageIds) && messageIds.length > 0) {
+          setMessages((prev) => prev.map((m) => messageIds.includes(m._id) ? { ...m, isRead: true } : m));
+        } else {
+          setMessages((prev) => prev.map((m) => (m.sender?._id === user._id || m.sender === user._id) ? { ...m, isRead: true } : m));
+        }
+      }
     };
     socket.on("new_message",    onNewMessage);
     socket.on("typing",         onTyping);
     socket.on("stop_typing",    onStopTyping);
+    const onUserOnline = (data) => {
+      setChatMeta((prev) => {
+        if (!prev) return prev;
+        const pts = prev.participants.map((p) => p._id === data.userId ? { ...p, isOnline: true } : p);
+        return { ...prev, participants: pts };
+      });
+    };
+    const onUserOffline = (data) => {
+      setChatMeta((prev) => {
+        if (!prev) return prev;
+        const pts = prev.participants.map((p) => p._id === data.userId ? { ...p, isOnline: false, lastSeen: data.lastSeen } : p);
+        return { ...prev, participants: pts };
+      });
+    };
+
     socket.on("messages_read",  onMessagesRead);
+    socket.on("user_online", onUserOnline);
+    socket.on("user_offline", onUserOffline);
+
     return () => {
       clearTimeout(typingTimerRef.current);
       socket.emit("leave_chat", { chatId });
@@ -155,8 +180,17 @@ const ChatWindow = () => {
       socket.off("typing",        onTyping);
       socket.off("stop_typing",   onStopTyping);
       socket.off("messages_read", onMessagesRead);
+      socket.off("user_online", onUserOnline);
+      socket.off("user_offline", onUserOffline);
     };
   }, [socket, chatId, user._id]);
+
+  // Scroll to bottom when other user types
+  useEffect(() => {
+    if (isTyping) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isTyping]);
 
   // ── Send ──────────────────────────────────────────────
   const sendMessage = () => {
@@ -327,22 +361,20 @@ const ChatWindow = () => {
 
             {/* Typing indicator */}
             {isTyping && (
-              <div className="flex items-end gap-2">
-                {getAvatarUrl(other) ? (
-                  <img src={getAvatarUrl(other)} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-400 shrink-0">
-                    {`${other?.firstName?.[0] ?? ""}`.toUpperCase()}
-                  </div>
-                )}
-                <div className="bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-2xl rounded-bl-sm px-4 py-2.5 flex items-center gap-1">
+              <div className="flex items-end mb-8 gap-2">
+                <img 
+                  src={getAvatarUrl(other)} 
+                  alt="typing" 
+                  className="w-7 h-7 rounded-full object-cover shrink-0 mb-0.5" 
+                />
+                <div className="bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-2xl rounded-bl-sm px-4 py-2 flex items-center gap-2 shadow-sm">
+                  <span className="text-[11px] text-slate-400 mr-1">  typing </span>
                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                   <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             )}
-
             {messages.length === 0 && !loading && (
               <div className="flex flex-col items-center justify-center h-full text-center py-16">
                 <p className="text-3xl mb-3">👋</p>

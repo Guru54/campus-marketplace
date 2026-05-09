@@ -1,31 +1,29 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Search, GraduationCap } from "lucide-react";
 
-const CollegeDropdown = ({ colleges = [], value, onChange, name }) => {
+const CollegeDropdown = ({ colleges = [], value, onChange, name, search, setSearch }) => {
   const [open, setOpen]       = useState(false);
-  const [search, setSearch]   = useState("");
   const dropdownRef           = useRef(null);
 
   // ── Selected College ──────────────────────────────────
   const selected = colleges.find((c) => c._id === value);
 
-  // ── Filter by search ──────────────────────────────────
-  const filtered = colleges.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.city.toLowerCase().includes(search.toLowerCase())
-  );
+  // ── Use API-filtered colleges ──────────────────────────────
+  const filtered = colleges;
 
   // ── Close on outside click ────────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
-        setSearch("");
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+
+    if (open) {
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
+    }
+  }, [open]);
 
   // ── Select handler ────────────────────────────────────
   const handleSelect = (college) => {
@@ -65,7 +63,9 @@ const CollegeDropdown = ({ colleges = [], value, onChange, name }) => {
 
       {/* ── Dropdown Panel ────────────────────────────── */}
       {open && (
-        <div className="
+        <div
+          onMouseDown={(e) => e.stopPropagation()}
+          className="
           absolute z-50 w-full mt-2
           rounded-xl border
           border-slate-200 dark:border-white/10
@@ -76,7 +76,9 @@ const CollegeDropdown = ({ colleges = [], value, onChange, name }) => {
 
           {/* Search */}
           <div className="p-2 border-b border-slate-100 dark:border-white/10">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg
               bg-slate-50 dark:bg-white/5
               border border-slate-200 dark:border-white/10"
             >

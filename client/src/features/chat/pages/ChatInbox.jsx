@@ -130,14 +130,48 @@ const ChatInbox = () => {
         chatAPI.getInbox().then(({ data }) => setChats(data.data.chats));
       }, 300);
     };
+
+    const handleOnline = ({ userId }) => {
+      setChats((prev) =>
+        prev.map((chat) => {
+          const idx = chat.participants.findIndex((p) => p._id === userId);
+          if (idx > -1) {
+            const newParticipants = [...chat.participants];
+            newParticipants[idx] = { ...newParticipants[idx], isOnline: true };
+            return { ...chat, participants: newParticipants };
+          }
+          return chat;
+        })
+      );
+    };
+
+    const handleOffline = ({ userId, lastSeen }) => {
+      setChats((prev) =>
+        prev.map((chat) => {
+          const idx = chat.participants.findIndex((p) => p._id === userId);
+          if (idx > -1) {
+            const newParticipants = [...chat.participants];
+            newParticipants[idx] = { ...newParticipants[idx], isOnline: false, lastSeen };
+            return { ...chat, participants: newParticipants };
+          }
+          return chat;
+        })
+      );
+    };
+
     socket.on("new_message", onNewMessage);
     socket.on("messages_read", onNewMessage);
     // Listen for inbox_update for real-time inbox refresh
     socket.on("inbox_update", onNewMessage);
+    socket.on("user_online", handleOnline);
+    socket.on("user_offline", handleOffline);
+    
     return () => {
       socket.off("new_message", onNewMessage);
       socket.off("messages_read", onNewMessage);
       socket.off("inbox_update", onNewMessage);
+      socket.off("user_online", handleOnline);
+      socket.off("user_offline", handleOffline);
       clearTimeout(refetchTimeout.current);
     };
   }, [socket]);

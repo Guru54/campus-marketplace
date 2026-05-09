@@ -23,7 +23,7 @@ export const MessageBubble = React.memo(({ msg, isMine, statusIcon }) => {
     : "";
 
   return (
-    <div className={`flex items-end gap-2 ${isMine ? "flex-row-reverse" : "flex-row"}`}>
+    <div className={`flex items-center gap-2 ${isMine ? "flex-row-reverse" : "flex-row"}`}>
       {showAvatar && (
         avatarUrl ? (
           <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0 mb-0.5" />

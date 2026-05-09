@@ -6,13 +6,13 @@ export const useChats = () => {
   const [chats, setChats] = useState([]);
   const [loadingChats, setLoadingChats] = useState(true);
 
-  const loadChats = useCallback(async () => {
-    setLoadingChats(true);
+  const loadChats = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoadingChats(true);
     try {
       const { data } = await chatAPI.getInbox();
       setChats(data.data.chats ?? []);
     } catch {
-      toast.error("Failed to load chats");
+      if (showLoading) toast.error("Failed to load chats");
     } finally {
       setLoadingChats(false);
     }

@@ -5,15 +5,15 @@
 
 // ── Card Skeleton ──────────────────────────────────────
 export const CardSkeleton = ({ count = 1 }) => (
-  <div className="space-y-3">
+  <>
     {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="animate-pulse">
+      <div key={i} className="animate-pulse space-y-3">
         <div className="aspect-square rounded-2xl bg-slate-200 dark:bg-white/10 mb-3" />
         <div className="h-4 bg-slate-200 dark:bg-white/10 rounded w-2/3 mb-2" />
         <div className="h-5 bg-slate-200 dark:bg-white/10 rounded w-1/2" />
       </div>
     ))}
-  </div>
+  </>
 );
 
 // ── Profile Skeleton ───────────────────────────────────
@@ -109,5 +109,12 @@ export const FormSkeleton = () => (
       </div>
     ))}
     <div className="h-10 bg-slate-200 dark:bg-white/10 rounded" />
+  </div>
+);
+
+// ── App Loader (Suspense Fallback) ─────────────────────
+export const AppLoader = () => (
+  <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-4">
+    <div className="w-10 h-10 border-4 border-slate-200 dark:border-white/10 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin" />
   </div>
 );

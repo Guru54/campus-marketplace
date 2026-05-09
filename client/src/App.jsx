@@ -4,7 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeContextProvider } from "@/context/ThemeContext";
 import { SocketProvider } from "@/context/SocketContext";
 import { Navbar, Footer, LenisScroll } from "@/shared/components";
-import { ListingDetailSkeleton } from "@/shared/components/skeletons";
+import { AppLoader } from "@/shared/components/skeletons";
 import ProtectedRoute from "@/features/auth/components/ProtectedRoute";
 import PublicOnlyRoute from "@/features/auth/components/PublicOnlyRoute";
 import { Toaster } from 'react-hot-toast';
@@ -55,7 +55,7 @@ function AppLayout() {
       {!isChatWindow && <LenisScroll />}
       <Toaster position="top-right" />
       <Navbar />
-      <Suspense fallback={<ListingDetailSkeleton />}>
+      <Suspense fallback={<AppLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route

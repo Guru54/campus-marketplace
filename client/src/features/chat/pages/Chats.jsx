@@ -116,14 +116,20 @@ const Chats = () => {
       }
       setDeliveredIds((ids) => [...new Set([...ids, msg._id])]);
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      loadChats();
+      loadChats(false);
     };
 
-    const onMessagesRead = ({ messageIds }) => {
-      if (Array.isArray(messageIds)) {
+    const onMessagesRead = ({ chatId, messageIds }) => {
+      // Update read status for specific messageIds if provided (for array of ids)
+      if (Array.isArray(messageIds) && messageIds.length > 0) {
         setReadIds((ids) => [...new Set([...ids, ...messageIds])]);
+        setMessages((prev) => prev.map((m) => (messageIds.includes(m._id) ? { ...m, isRead: true } : m)));
+      } else if (chatId) {
+        // Fallback for marking all my sent messages as read in this chat
+        setMessages((prev) => prev.map((m) => 
+          (m.sender?._id === user._id || m.sender === user._id) ? { ...m, isRead: true } : m
+        ));
       }
-      setMessages((prev) => prev.map((m) => (messageIds?.includes(m._id) ? { ...m, isRead: true } : m)));
     };
 
     const onTyping = ({ userId, typingChatId }) => {
@@ -148,24 +154,73 @@ const Chats = () => {
     };
   }, [socket, selectedChatId, user._id, loadChats, setIsTyping]);
 
+  // Scroll bottom on typing
+  useEffect(() => {
+    if (isTyping) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isTyping]);
+
   // Socket listeners for online presence
   useEffect(() => {
-    if (!socket || !selectedChatId) return;
-    const selectedOther = getOtherParticipant(chatMeta) || getOtherParticipant(chats.find((chat) => chat._id === selectedChatId));
-    if (!selectedOther?._id) return;
+    if (!socket) return;
+    
     const handleOnline = ({ userId }) => {
-      if (userId === selectedOther._id) setOtherPresence((p) => ({ ...p, isOnline: true }));
+      // 1) Update otherPresence if the user handles the currently selected chat
+      if (selectedChatId) {
+        const selectedOther = getOtherParticipant(chatMeta) || getOtherParticipant(chats.find((c) => c._id === selectedChatId));
+        if (selectedOther && userId === selectedOther._id) {
+          setOtherPresence((p) => ({ ...p, isOnline: true }));
+        }
+      }
+
+      // 2) Update chats list globally so inbox dots change instantly
+      setChats((prev) => 
+        prev.map((chat) => {
+          const idx = chat.participants.findIndex((p) => p._id === userId);
+          if (idx > -1) {
+            const newParticipants = [...chat.participants];
+            newParticipants[idx] = { ...newParticipants[idx], isOnline: true };
+            return { ...chat, participants: newParticipants };
+          }
+          return chat;
+        })
+      );
     };
+
     const handleOffline = ({ userId, lastSeen }) => {
-      if (userId === selectedOther._id) setOtherPresence((p) => ({ ...p, isOnline: false, lastSeen }));
+      if (selectedChatId) {
+        const selectedOther = getOtherParticipant(chatMeta) || getOtherParticipant(chats.find((c) => c._id === selectedChatId));
+        if (selectedOther && userId === selectedOther._id) {
+          setOtherPresence((p) => ({ ...p, isOnline: false, lastSeen }));
+        }
+      }
+
+      setChats((prev) => 
+        prev.map((chat) => {
+          const idx = chat.participants.findIndex((p) => p._id === userId);
+          if (idx > -1) {
+            const newParticipants = [...chat.participants];
+            newParticipants[idx] = { ...newParticipants[idx], isOnline: false, lastSeen };
+            return { ...chat, participants: newParticipants };
+          }
+          return chat;
+        })
+      );
     };
+
+    const handleInboxUpdate = () => loadChats(false);
+
     socket.on("user_online", handleOnline);
     socket.on("user_offline", handleOffline);
+    socket.on("inbox_update", handleInboxUpdate);
+
     return () => {
       socket.off("user_online", handleOnline);
       socket.off("user_offline", handleOffline);
+      socket.off("inbox_update", handleInboxUpdate);
     };
-  }, [socket, chatMeta, chats, selectedChatId, getOtherParticipant]);
+  }, [socket, chatMeta, chats, selectedChatId, getOtherParticipant, setChats, loadChats]);
 
   // Sync presence state when selectedOther changes
   useEffect(() => {
@@ -320,7 +375,7 @@ const Chats = () => {
                   bottomRef={bottomRef}
                   renderStatus={renderStatus}
                 />
-                <ChatInput draft={draft} sending={false} onDraftChange={handleDraftChange} onKeyDown={handleKeyDown} onSendMessage={sendMessage} />
+                <ChatInput draft={draft} sending={false} onDraftChange={handleDraftChange} onKeyDown={handleKeyDown} onSendMessage={() => sendMessage()} />
               </>
             )}
           </section>

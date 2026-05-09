@@ -1,12 +1,7 @@
 import axios from 'axios';
+import { env } from '../config/env';
 
-// Prefer VITE_API_URL; if provided without path, append `/api/v1`.
-const rawViteApi = import.meta.env.VITE_API_URL || import.meta.env.VITE_APP_BASE_URL;
-const API_URL = rawViteApi
-  ? (rawViteApi.endsWith('/api') || rawViteApi.endsWith('/api/v1')
-      ? rawViteApi.replace(/\/?$/, '')
-      : rawViteApi.replace(/\/?$/, '') + '/api/v1')
-  : 'http://localhost:5000/api/v1';
+const API_URL = env.API_BASE_URL;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -76,9 +71,8 @@ export const chatAPI = {
 
 // User Profile & Settings
 export const userAPI = {
-  getProfile: () => api.get('/user/profile'),
-  updateProfile: (data) => api.patch('/user/profile', data),
-  updateAvatar: (formData) => api.patch('/user/avatar', formData, {
+  getProfile: () => api.get('/users/profile'),
+  updateProfile: (formData) => api.put('/users/profile', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   changePassword: (data) => api.put('/users/change-password', data),

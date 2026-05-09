@@ -3,7 +3,7 @@ const express      = require('express');
 const cookieParser = require('cookie-parser');
 const cors         = require('cors');
 
-app.set('trust proxy', 1);
+
 
 const connectDB    = require('./src/config/db');
 
@@ -32,7 +32,7 @@ app.use(helmetMiddleware);     // secure HTTP headers
 const ALLOWED_ORIGINS = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
   .map((o) => o.trim())
-  .concat(['http://localhost:5174', 'http://localhost:5175']); // Vite fallback ports
+  .concat(['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175']); // Vite fallback ports
 
 app.use(cors({
   origin: (origin, cb) => {

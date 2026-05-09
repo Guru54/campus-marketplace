@@ -59,11 +59,12 @@ export const MessageList = React.memo(({
       })}
 
       {isTyping && (
-        <div className="flex items-end gap-2">
-          <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-400 shrink-0">
-            {/* Optional chaining safely added for initials */}
-            {`${selectedOther?.firstName?.[0] ?? ""}`.toUpperCase()}
-          </div>
+        <div className="flex items-end gap-2 mb-8">
+          <img 
+            src={getAvatarUrl(selectedOther)} 
+            alt="typing" 
+            className="w-7 h-7 rounded-full object-cover shrink-0 mb-0.5" 
+          />
           <div className="bg-white/10 border border-white/10 rounded-2xl rounded-bl-sm px-4 py-2.5 flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
             <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />

@@ -9,6 +9,8 @@ import { featuresData } from "@/data/featuresData";
 import { faqsData } from "@/data/faqsData";
 import { collegesData } from "@/data/collegesData";
 
+import { useAuth } from "@/context/AuthContext";
+
 //  FAQ Accordion
 const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -68,6 +70,7 @@ const FaqSection = () => {
 //  Home Page
 export default function Home() {
   const { theme } = useThemeContext();
+  const { user } = useAuth();
 
   return (
     <>
@@ -118,18 +121,29 @@ export default function Home() {
 
         {/* CTA buttons */}
         <div className="flex items-center gap-4 mt-8">
-          <Link
-            to="/register"
-            className="bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md px-7 h-11 flex items-center font-medium"
-          >
-            Join Rezell
-          </Link>
-          <Link
-            to="/listings"
-            className="flex items-center gap-2 border border-indigo-900 text-slate-700 dark:text-white rounded-md px-7 h-11 transition hover:border-indigo-500"
-          >
-            Browse Listings
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                to="/register"
+                className="bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md px-7 h-11 flex items-center font-medium"
+              >
+                Join Rezell
+              </Link>
+              <Link
+                to="/login"
+                className="flex items-center gap-2 border border-indigo-900 text-slate-700 dark:text-white rounded-md px-7 h-11 transition hover:border-indigo-500"
+              >
+                Sign In
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/listings"
+              className="bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md px-7 h-11 flex items-center font-medium shadow-lg shadow-indigo-500/20"
+            >
+              Browse Listings
+            </Link>
+          )}
         </div>
 
         {/* Trust micro-proof */}
@@ -251,18 +265,29 @@ export default function Home() {
           Join your campus network. Buy trusted. Sell fast. Rezell.
         </p>
         <div className="flex items-center gap-4 mt-8">
-          <Link
-            to="/register"
-            className="bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md px-7 h-11 flex items-center font-medium"
-          >
-            Join Rezell
-          </Link>
-          <Link
-            to="/listings"
-            className="border border-indigo-900 text-slate-700 dark:text-white rounded-md px-7 h-11 flex items-center transition hover:border-indigo-500"
-          >
-            Browse Listings
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                to="/register"
+                className="bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md px-7 h-11 flex items-center font-medium"
+              >
+                Join Rezell
+              </Link>
+              <Link
+                to="/login"
+                className="border border-indigo-900 text-slate-700 dark:text-white rounded-md px-7 h-11 flex items-center transition hover:border-indigo-500"
+              >
+                Sign In
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/listings"
+              className="bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md px-7 h-11 flex items-center font-medium shadow-lg shadow-indigo-500/20"
+            >
+              Browse Listings
+            </Link>
+          )}
         </div>
         <p className="mt-4 text-xs text-slate-400">
           Built for students. Designed with system thinking.

@@ -10,15 +10,18 @@ const { updateProfileSchema, changePasswordSchema } = require("../validations/us
 // All user routes require auth
 router.use(protect);
 
-// ── Profile ─────────────────────────────────────────────────
-router.get("/:id", getProfile);
+router.put("/change-password", validate(changePasswordSchema), changePassword);
 
+// ── Profile ─────────────────────────────────────────────────
 router.put(
   "/profile",
   ...uploadAvatar,                      // multer + cloudinary
   validate(updateProfileSchema),         // joi
   updateProfile
 );
+
+router.get("/:id", getProfile);
+
 
 // ── Password ───────────────────────────────────────────────
 router.put("/change-password", validate(changePasswordSchema), changePassword);

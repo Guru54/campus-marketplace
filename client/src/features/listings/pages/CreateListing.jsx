@@ -154,7 +154,7 @@ const CreateListing = () => {
                     key={value}
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, category: value }))}
-                    className={`rounded-xl py-3 text-xs border transition ${
+                    className={`cursor-pointer rounded-xl py-3 text-xs border transition ${
                       form.category === value
                         ? "border-indigo-500 bg-indigo-500/10 text-indigo-400"
                         : "border-white/10 hover:border-indigo-500 text-white/70"
@@ -174,7 +174,7 @@ const CreateListing = () => {
                     key={value}
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, condition: value }))}
-                    className={`rounded-xl px-4 py-3 text-sm border transition text-left ${
+                    className={`cursor-pointer rounded-xl px-4 py-3 text-sm border transition text-left ${
                       form.condition === value
                         ? "border-indigo-500 bg-indigo-500/10"
                         : "border-white/10 hover:border-indigo-500"
@@ -222,7 +222,7 @@ const CreateListing = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 font-bold transition shadow-lg shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-white uppercase tracking-wider"
+            className="cursor-pointer w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 font-bold transition shadow-lg shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed text-white uppercase tracking-wider"
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">

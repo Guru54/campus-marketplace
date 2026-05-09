@@ -1,19 +1,42 @@
-﻿import { useEffect } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useRegisterMutation } from "@/shared/hooks/useAuth";
-import { useCollegesQuery } from "@/shared/hooks/useQuery";
 import { useForm, validators, composeValidators } from "@/shared/hooks/useForm";
 import { notify } from "@/shared/services/notify";
+import api from "@/shared/services/api";
 import AuthLayout from "@/features/auth/components/AuthLayout";
 import CollegeDropdown from "@/shared/components/CollegeDropdown";
 import { FormSkeleton } from "@/shared/components/skeletons";
 
 const Register = () => {
-   const { data: colleges = [], isLoading: collegesLoading } = useCollegesQuery();
+  const [search, setSearch] = useState("");
+  const [colleges, setColleges] = useState([]);
+  const [collegesLoading, setCollegesLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const registerMutation = useRegisterMutation();
+
+  // Debounced college search
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      try {
+        setCollegesLoading(true);
+        const res = await api.get("/auth/colleges", {
+          params: { search, limit: 100 }
+        });
+        setColleges(res.data.data.colleges);
+      } catch (err) {
+        console.error("Failed to fetch colleges:", err);
+      } finally {
+        setCollegesLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const validateForm = (field, value) => {
     const validations = {
@@ -116,16 +139,14 @@ const Register = () => {
   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
     College
   </label>
-  {collegesLoading ? (
-    <div className="w-full h-10 bg-slate-100 dark:bg-white/5 animate-pulse rounded-lg flex items-center px-4 text-xs text-slate-400">
-      Loading colleges...
-    </div>
-  ) : (
-    <CollegeDropdown
-      colleges={colleges}
-      {...form.getFieldProps("collegeId")}
-    />
-  )}
+  <CollegeDropdown
+    colleges={colleges}
+    value={form.values.collegeId}
+    onChange={form.handleChange}
+    name="collegeId"
+    search={search}
+    setSearch={setSearch}
+  />
 
   {form.getFieldMeta("collegeId").isError && <p className="text-red-500 text-xs mt-1">{form.errors.collegeId}</p>}
 </div>
@@ -154,10 +175,17 @@ const Register = () => {
               <div className="relative">
                 <input
                   {...form.getFieldProps("password")}
-                  type={form.touched.password ? "text" : "password"}
+                  type={showPassword ? "text" : "password"}
                   placeholder="Min. 8 characters"
                   className={`w-full px-4 py-2.5 rounded-lg border ${form.getFieldMeta("password").isError ? "border-red-500" : "border-slate-200 dark:border-white/15"} bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition pr-10`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {form.getFieldMeta("password").isError && <p className="text-red-500 text-xs mt-1">{form.errors.password}</p>}
               {form.values.password && !form.errors.password && (
@@ -176,10 +204,17 @@ const Register = () => {
               <div className="relative">
                 <input
                   {...form.getFieldProps("confirmPassword")}
-                  type={"password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Re-enter your password"
                   className={`w-full px-4 py-2.5 rounded-lg border ${form.getFieldMeta("confirmPassword").isError ? "border-red-500" : "border-slate-200 dark:border-white/15"} bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition pr-10`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 focus:outline-none cursor-pointer"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {form.getFieldMeta("confirmPassword").isError && <p className="text-red-500 text-xs mt-1">{form.errors.confirmPassword}</p>}
               {form.values.confirmPassword && !form.errors.confirmPassword && (
