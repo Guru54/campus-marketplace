@@ -31,7 +31,7 @@ const app = express();
 
 // ── Security ──────────────────────────────────────────────
 app.use(helmetMiddleware); // secure HTTP headers
-
+app.set('trust proxy', 1);
 // ── CORS ──────────────────────────────────────────────────
 // Localhost dev ports are only appended outside production, so a
 // production deployment can never be bypassed via a spoofed
