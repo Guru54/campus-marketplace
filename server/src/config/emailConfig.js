@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 // ── Verify connection on startup ───────────────────────────
 transporter.verify((error) => {
-  const logger = require('../utils/logger');
+  const logger = require("../utils/logger");
   if (error) {
     console.error("Email transporter error:", error.message);
   } else {

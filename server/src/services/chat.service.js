@@ -1,6 +1,6 @@
-const Chat     = require("../models/Chat");
-const Message  = require("../models/Message");
-const Listing  = require("../models/Listing");
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
+const Listing = require("../models/Listing");
 const AppError = require("../utils/AppError");
 const paginate = require("../utils/paginate");
 
@@ -12,9 +12,9 @@ const startChat = async (data, buyer) => {
 
   // Validate listing exists and is in same college
   const listing = await Listing.findOne({
-    _id:     listingId,
+    _id: listingId,
     college: buyer.college,
-    status:  "ACTIVE",
+    status: "ACTIVE",
   });
   if (!listing) throw new AppError("Listing not found or unavailable", 404);
 
@@ -24,21 +24,24 @@ const startChat = async (data, buyer) => {
 
   // Find existing chat or create new one
   let chat = await Chat.findOne({
-    listing:      listingId,
+    listing: listingId,
     participants: { $all: [buyer._id, sellerId] },
   });
 
   if (!chat) {
     chat = await Chat.create({
       participants: [buyer._id, sellerId],
-      listing:      listingId,
-      college:      buyer.college,
+      listing: listingId,
+      college: buyer.college,
     });
   }
 
   await chat.populate([
-    { path: "participants", select: "firstName lastName avatar isOnline lastSeen" },
-    { path: "listing",      select: "title price images status" },
+    {
+      path: "participants",
+      select: "firstName lastName avatar isOnline lastSeen",
+    },
+    { path: "listing", select: "title price images status" },
   ]);
 
   return chat;
@@ -50,10 +53,10 @@ const startChat = async (data, buyer) => {
 const getMyChats = async (user) => {
   const chats = await Chat.find({
     participants: user._id,
-    deletedBy:    { $ne: user._id },
+    deletedBy: { $ne: user._id },
   })
     .populate("participants", "firstName lastName avatar isOnline lastSeen")
-    .populate("listing",      "title price images status")
+    .populate("listing", "title price images status")
     .sort({ lastMessageAt: -1 })
     .lean({ virtuals: true });
 
@@ -61,12 +64,12 @@ const getMyChats = async (user) => {
   const chatsWithUnread = await Promise.all(
     chats.map(async (chat) => {
       const unread = await Message.countDocuments({
-        chat:   chat._id,
+        chat: chat._id,
         sender: { $ne: user._id },
         isRead: false,
       });
       return { ...chat, unread };
-    })
+    }),
   );
 
   return chatsWithUnread;
@@ -78,15 +81,19 @@ const getMyChats = async (user) => {
 const getMessages = async (chatId, query, user) => {
   // Verify user is participant
   const chat = await Chat.findOne({
-    _id:          chatId,
+    _id: chatId,
     participants: user._id,
-    deletedBy:    { $ne: user._id },
+    deletedBy: { $ne: user._id },
   })
     .populate("participants", "firstName lastName avatar isOnline lastSeen")
     .populate("listing", "title price images status");
   if (!chat) throw new AppError("Chat not found", 404);
 
-  const { skip, limit: lim, page: pg } = paginate(query.page, query.limit || 30);
+  const {
+    skip,
+    limit: lim,
+    page: pg,
+  } = paginate(query.page, query.limit || 30);
 
   const [messages, total] = await Promise.all([
     Message.find({ chat: chatId })
@@ -102,7 +109,7 @@ const getMessages = async (chatId, query, user) => {
   // Mark unread messages as read
   await Message.updateMany(
     { chat: chatId, sender: { $ne: user._id }, isRead: false },
-    { isRead: true }
+    { isRead: true },
   );
 
   return {
@@ -110,11 +117,11 @@ const getMessages = async (chatId, query, user) => {
     messages,
     pagination: {
       total,
-      page:       pg,
-      limit:      lim,
+      page: pg,
+      limit: lim,
       totalPages: Math.ceil(total / lim),
-      hasNext:    pg < Math.ceil(total / lim),
-      hasPrev:    pg > 1,
+      hasNext: pg < Math.ceil(total / lim),
+      hasPrev: pg > 1,
     },
   };
 };
@@ -124,19 +131,20 @@ const getMessages = async (chatId, query, user) => {
 // ─────────────────────────────────────────────────────────────
 const sendMessage = async (chatId, content, sender) => {
   const chat = await Chat.findOne({
-    _id:          chatId,
+    _id: chatId,
     participants: sender._id,
   });
   if (!chat) throw new AppError("Chat not found", 404);
 
   const message = await Message.create({
-    chat:    chatId,
-    sender:  sender._id,
+    chat: chatId,
+    sender: sender._id,
     content,
   });
 
   // Update chat preview
-  chat.lastMessage   = content.length > 60 ? content.slice(0, 57) + "..." : content;
+  chat.lastMessage =
+    content.length > 60 ? content.slice(0, 57) + "..." : content;
   chat.lastMessageAt = new Date();
   await chat.save();
 
@@ -150,7 +158,7 @@ const sendMessage = async (chatId, content, sender) => {
 // ─────────────────────────────────────────────────────────────
 const deleteChat = async (chatId, user) => {
   const chat = await Chat.findOne({
-    _id:          chatId,
+    _id: chatId,
     participants: user._id,
   });
   if (!chat) throw new AppError("Chat not found", 404);
@@ -161,4 +169,10 @@ const deleteChat = async (chatId, user) => {
   }
 };
 
-module.exports = { startChat, getMyChats, getMessages, sendMessage, deleteChat };
+module.exports = {
+  startChat,
+  getMyChats,
+  getMessages,
+  sendMessage,
+  deleteChat,
+};

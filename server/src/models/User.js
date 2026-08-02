@@ -68,6 +68,12 @@ const userSchema = new mongoose.Schema(
       select: false, // ← never return in response
     },
 
+    otpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+
     // ── Online Status ─────────────────────────────────────
     isOnline: {
       type: Boolean,
@@ -88,20 +94,41 @@ const userSchema = new mongoose.Schema(
 
     // ── Account Lock ──────────────────────────────────────
     loginAttempts: {
-      type:    Number,
+      type: Number,
       default: 0,
-      select:  false,
+      select: false,
     },
 
     lockUntil: {
-      type:    Date,
+      type: Date,
       default: null,
-      select:  false,
+      select: false,
+    },
+
+    // ── Password reset (reuses otp/otpExpiry above for the code itself) ──
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+      select: false,
+      // Any JWT issued before this timestamp is treated as invalid —
+      // see authMiddleware.protect
+    },
+
+    // ── Moderation ──────────────────────────────────────────
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+
+    bannedReason: {
+      type: String,
+      default: null,
+      select: false,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // ── Indexes ────────────────────────────────────────────────
@@ -125,7 +152,7 @@ userSchema.virtual("avatarUrl").get(function () {
 });
 
 // ── toJSON ─────────────────────────────────────────────────
-userSchema.set("toJSON",   { virtuals: true });
+userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });
 
 module.exports = mongoose.model("User", userSchema);

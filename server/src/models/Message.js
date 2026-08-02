@@ -39,12 +39,12 @@ const messageSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // ── Indexes ────────────────────────────────────────────────
 messageSchema.index({ chat: 1, createdAt: 1 }); // fetch messages in order
-messageSchema.index({ sender: 1 });              // messages by user
-messageSchema.index({ chat: 1, isRead: 1 });     // unread count query
+messageSchema.index({ sender: 1 }); // messages by user
+messageSchema.index({ chat: 1, isRead: 1 }); // unread count query
 
 module.exports = mongoose.model("Message", messageSchema);

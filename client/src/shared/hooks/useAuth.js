@@ -69,6 +69,66 @@ export const useVerifyOTPMutation = (options = {}) => {
   });
 };
 
+// ── Resend OTP Hook ────────────────────────────────────
+export const useResendOTPMutation = (options = {}) => {
+  return useMutation({
+    mutationFn: (data) => authAPI.resendOTP(data),
+    onSuccess: (response) => {
+      notify.success("OTP resent! Check your email.");
+      options.onSuccess?.(response);
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || "Could not resend OTP";
+      notify.error(message);
+      options.onError?.(error);
+    },
+  });
+};
+
+// ── Forgot Password Hook ──────────────────────────────
+export const useForgotPasswordMutation = (options = {}) => {
+  return useMutation({
+    mutationFn: (data) => authAPI.forgotPassword(data),
+    onSuccess: (response) => {
+      notify.success("If that account exists, a reset code has been sent.");
+      options.onSuccess?.(response);
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || "Something went wrong";
+      notify.error(message);
+      options.onError?.(error);
+    },
+  });
+};
+
+// ── Reset Password Hook ───────────────────────────────
+export const useResetPasswordMutation = (options = {}) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (data) => authAPI.resetPassword(data),
+    onSuccess: (response) => {
+      const userData = response.data.data?.user;
+      if (userData) {
+        login(userData);
+        notify.success("Password reset! You're logged in.");
+        navigate("/listings");
+      } else {
+        // Account suspended — resetPassword succeeded but no session was issued
+        notify.success(response.data.message || "Password reset successfully");
+        navigate("/login");
+      }
+      options.onSuccess?.(response);
+    },
+    onError: (error) => {
+      const message = error?.response?.data?.message || "Could not reset password";
+      notify.error(message);
+      options.onError?.(error);
+    },
+  });
+};
+
 // ── Logout Hook ────────────────────────────────────────
 export const useLogoutMutation = (options = {}) => {
   const { logout } = useAuth();

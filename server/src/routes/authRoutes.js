@@ -1,5 +1,5 @@
 const express = require("express");
-const router  = express.Router();
+const router = express.Router();
 
 const {
   register,
@@ -8,37 +8,47 @@ const {
   logout,
   getMe,
   getColleges,
+  resendOTP,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/authController");
 
-const { protect }                 = require("../middleware/authMiddleware");
-const validate                    = require("../middleware/validate");
+const { protect } = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
 const { authLimiter, otpLimiter } = require("../middleware/securityMiddleware");
 
 const {
   registerSchema,
   verifyOTPSchema,
   loginSchema,
+  resendOTPSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } = require("../validations/auth.validation");
 
 // ── Public Routes ──────────────────────────────────────────
 router.get("/colleges", getColleges);
 
-router.post("/register",
-  authLimiter,
-  validate(registerSchema),
-  register
-);
+router.post("/register", authLimiter, validate(registerSchema), register);
 
-router.post("/verify-otp",
+router.post("/verify-otp", otpLimiter, validate(verifyOTPSchema), verifyOTP);
+
+router.post("/resend-otp", otpLimiter, validate(resendOTPSchema), resendOTP);
+
+router.post("/login", authLimiter, validate(loginSchema), login);
+
+router.post(
+  "/forgot-password",
   otpLimiter,
-  validate(verifyOTPSchema),
-  verifyOTP
+  validate(forgotPasswordSchema),
+  forgotPassword,
 );
 
-router.post("/login",
-  authLimiter,
-  validate(loginSchema),
-  login
+router.post(
+  "/reset-password",
+  otpLimiter,
+  validate(resetPasswordSchema),
+  resetPassword,
 );
 
 router.post("/logout", logout);

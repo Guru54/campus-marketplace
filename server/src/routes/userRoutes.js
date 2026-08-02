@@ -1,11 +1,18 @@
-const express  = require("express");
-const router   = express.Router();
+const express = require("express");
+const router = express.Router();
 
-const { getProfile, updateProfile, changePassword } = require("../controllers/userController");
-const { protect }          = require("../middleware/authMiddleware");
-const validate             = require("../middleware/validate");
-const { uploadAvatar }     = require("../middleware/uploadMiddleware");
-const { updateProfileSchema, changePasswordSchema } = require("../validations/user.validation");
+const {
+  getProfile,
+  updateProfile,
+  changePassword,
+} = require("../controllers/userController");
+const { protect } = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
+const { uploadAvatar } = require("../middleware/uploadMiddleware");
+const {
+  updateProfileSchema,
+  changePasswordSchema,
+} = require("../validations/user.validation");
 
 // All user routes require auth
 router.use(protect);
@@ -15,13 +22,12 @@ router.put("/change-password", validate(changePasswordSchema), changePassword);
 // ── Profile ─────────────────────────────────────────────────
 router.put(
   "/profile",
-  ...uploadAvatar,                      // multer + cloudinary
-  validate(updateProfileSchema),         // joi
-  updateProfile
+  ...uploadAvatar, // multer + cloudinary
+  validate(updateProfileSchema), // joi
+  updateProfile,
 );
 
 router.get("/:id", getProfile);
-
 
 // ── Password ───────────────────────────────────────────────
 router.put("/change-password", validate(changePasswordSchema), changePassword);

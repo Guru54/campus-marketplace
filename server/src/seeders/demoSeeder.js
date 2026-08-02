@@ -177,7 +177,9 @@ const DEMO_LISTINGS = [
 
 // ──────────────────────────────────────────────────────────
 const seed = async () => {
-  await mongoose.connect("mongodb+srv://gurusRezell:llmMOn7JiBO7Iq5s@cluster1.2xggvwv.mongodb.net/?appName=cluster1");
+  await mongoose.connect(
+    "mongodb+srv://gurusRezell:llmMOn7JiBO7Iq5s@cluster1.2xggvwv.mongodb.net/?appName=cluster1",
+  );
 
   logger.log("✅ Connected to MongoDB");
 
@@ -188,7 +190,7 @@ const seed = async () => {
 
   if (!college) {
     console.error(
-      `❌ College "${DEMO_COLLEGE_NAME}" not found.\nRun college seeder first.`
+      `❌ College "${DEMO_COLLEGE_NAME}" not found.\nRun college seeder first.`,
     );
 
     process.exit(1);

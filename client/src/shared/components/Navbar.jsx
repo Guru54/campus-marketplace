@@ -1,4 +1,4 @@
-import { MenuIcon, Plus, LogOut, Package, MessageCircle, Settings, X, ChevronRight, Home, List, User } from "lucide-react";
+import { MenuIcon, Plus, LogOut, Package, MessageCircle, Settings, X, ChevronRight, Home, List, User, Shield } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
@@ -173,6 +173,11 @@ const Navbar = () => {
                     <Link to="/settings" onClick={() => setOpenUserMenu(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition">
                       <Settings size={14} /> Settings
                     </Link>
+                    {user.role === "ADMIN" && (
+                      <Link to="/admin" onClick={() => setOpenUserMenu(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-indigo-500 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                        <Shield size={14} /> Admin Dashboard
+                      </Link>
+                    )}
                     <div className="border-t border-slate-100 dark:border-white/10 my-1" />
                     <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition cursor-pointer">
                       <LogOut size={14} /> Logout
@@ -313,6 +318,11 @@ const Navbar = () => {
                 <Link to="/settings" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition">
                   <Settings size={18} className="text-slate-400 dark:text-slate-500" /> Settings
                 </Link>
+                {user.role === "ADMIN" && (
+                  <Link to="/admin" className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-indigo-500 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                    <Shield size={18} /> Admin Dashboard
+                  </Link>
+                )}
               </div>
             </div>
           )}

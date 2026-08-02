@@ -1,6 +1,6 @@
 const listingService = require("../services/listing.service");
-const asyncHandler   = require("../utils/asyncHandler");
-const sendResponse   = require("../utils/sendResponse");
+const asyncHandler = require("../utils/asyncHandler");
+const sendResponse = require("../utils/sendResponse");
 
 // ─────────────────────────────────────────────────────────────
 // @route   GET /api/v1/listings
@@ -25,7 +25,10 @@ const getMyListings = asyncHandler(async (req, res) => {
 // @access  Private (college-scoped)
 // ─────────────────────────────────────────────────────────────
 const getListingById = asyncHandler(async (req, res) => {
-  const listing = await listingService.getListingById(req.params.id, req.user.college);
+  const listing = await listingService.getListingById(
+    req.params.id,
+    req.user.college,
+  );
   sendResponse(res, 200, { listing });
 });
 
@@ -34,7 +37,11 @@ const getListingById = asyncHandler(async (req, res) => {
 // @access  Private
 // ─────────────────────────────────────────────────────────────
 const createListing = asyncHandler(async (req, res) => {
-  const listing = await listingService.createListing(req.body, req.user, req.ip);
+  const listing = await listingService.createListing(
+    req.body,
+    req.user,
+    req.ip,
+  );
   sendResponse(res, 201, { listing }, "Listing created successfully");
 });
 
@@ -43,7 +50,11 @@ const createListing = asyncHandler(async (req, res) => {
 // @access  Private (owner only)
 // ─────────────────────────────────────────────────────────────
 const updateListing = asyncHandler(async (req, res) => {
-  const listing = await listingService.updateListing(req.params.id, req.body, req.user);
+  const listing = await listingService.updateListing(
+    req.params.id,
+    req.body,
+    req.user,
+  );
   sendResponse(res, 200, { listing }, "Listing updated successfully");
 });
 

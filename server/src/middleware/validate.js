@@ -10,14 +10,12 @@ const AppError = require("../utils/AppError");
  */
 const validate = (schema) => (req, res, next) => {
   const { error, value } = schema.validate(req.body, {
-    abortEarly:   false, // collect all errors at once
-    stripUnknown: true,  // remove fields not in schema
+    abortEarly: false, // collect all errors at once
+    stripUnknown: true, // remove fields not in schema
   });
 
   if (error) {
-    const message = error.details
-      .map((detail) => detail.message)
-      .join(", ");
+    const message = error.details.map((detail) => detail.message).join(", ");
 
     return next(new AppError(message, 400));
   }
@@ -33,7 +31,7 @@ const validate = (schema) => (req, res, next) => {
  */
 const validateQuery = (schema) => (req, res, next) => {
   const { error, value } = schema.validate(req.query, {
-    abortEarly:   false,
+    abortEarly: false,
     stripUnknown: true,
   });
 

@@ -1,8 +1,6 @@
 ﻿import { Link } from "react-router-dom";
-import Marquee from "react-fast-marquee";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useThemeContext } from "@/context/ThemeContext";
 import SectionTitle from "@/shared/components/SectionTitle";
 import { featuresData } from "@/data/featuresData";
@@ -67,9 +65,23 @@ const FaqSection = () => {
   );
 };
 
+const CollegeTicker = () => (
+  <div className="overflow-hidden max-w-4xl mx-auto">
+    <div className="flex w-max items-center animate-campus-ticker">
+      {[...collegesData, ...collegesData].map((college, i) => (
+        <span
+          key={`${college.name}-${i}`}
+          className="mx-10 text-sm font-semibold text-slate-400 dark:text-slate-500 whitespace-nowrap"
+        >
+          {college.name}
+        </span>
+      ))}
+    </div>
+  </div>
+);
+
 //  Home Page
 export default function Home() {
-  const { theme } = useThemeContext();
   const { user } = useAuth();
 
   return (
@@ -89,6 +101,8 @@ export default function Home() {
                 className="size-7 rounded-full ring-2 ring-white dark:ring-black"
                 src={src}
                 alt="student"
+                loading="lazy"
+                decoding="async"
               />
             ))}
           </div>
@@ -157,27 +171,11 @@ export default function Home() {
         <h3 className="text-sm text-center text-slate-400 mt-24 pb-6 font-medium">
           Building trust across campuses, including
         </h3>
-        <Marquee
-          className="max-w-4xl mx-auto"
-          gradient={true}
-          speed={30}
-          gradientColor={theme === "dark" ? "#030712" : "#fff"}
-        >
-          <div className="flex items-center">
-            {[...collegesData, ...collegesData].map((college, i) => (
-              <span
-                key={i}
-                className="mx-10 text-sm font-semibold text-slate-400 dark:text-slate-500 whitespace-nowrap"
-              >
-                {college.name}
-              </span>
-            ))}
-          </div>
-        </Marquee>
+        <CollegeTicker />
       </div>
 
       {/*  FEATURES + HOW IT WORKS  */}
-      <div id="features" className="relative overflow-hidden py-10">
+      <div id="features" className="relative overflow-hidden py-10 lazy-paint">
         {/* Left-center glow */}
         <div className="pointer-events-none absolute left-30 top-1/2 -translate-y-1/2 w-[500px] h-[500px] -translate-x-1/2 rounded-full bg-violet-600/20 dark:bg-violet-600/30 blur-[100px] -z-10" />
 
@@ -189,13 +187,9 @@ export default function Home() {
         />
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-4 mt-10 px-6 md:px-16 lg:px-24 xl:px-32">
           {featuresData.slice(0, 4).map((feature, i) => (
-            <motion.div
+            <div
               key={i}
               className="p-6 rounded-xl space-y-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/20 max-w-80 md:max-w-66"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.45, delay: i * 0.08, ease: "easeOut" }}
             >
               <feature.icon
                 className="text-indigo-500 size-8 mt-4"
@@ -205,7 +199,7 @@ export default function Home() {
               <p className="text-slate-400 text-sm line-clamp-2">
                 {feature.description}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -234,30 +228,28 @@ export default function Home() {
                 desc: "Pick a campus spot, hand it over, collect payment. Then rate the experience.",
               },
             ].map((s, i) => (
-              <motion.div
+              <div
                 key={i}
                 className="p-6 rounded-xl space-y-3 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/20 max-w-80 md:max-w-66"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.45, delay: i * 0.1, ease: "easeOut" }}
               >
                 <p className="text-4xl font-extrabold text-indigo-300 dark:text-indigo-900 leading-none">
                   {s.step}
                 </p>
                 <h3 className="text-base font-medium">{s.title}</h3>
                 <p className="text-slate-400 text-sm">{s.desc}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </div>
 
       {/*  FAQ  */}
-      <FaqSection />
+      <div className="lazy-paint">
+        <FaqSection />
+      </div>
 
       {/*  FINAL CTA  */}
-      <div className="flex flex-col items-center text-center justify-center mt-28 mb-10 px-4">
+      <div className="flex flex-col items-center text-center justify-center mt-28 mb-10 px-4 lazy-paint">
         <h3 className="text-3xl font-semibold mt-16 mb-4">
           Ready to trade smarter?
         </h3>

@@ -16,15 +16,18 @@ const handleValidationError = (err) => {
   return new AppError(message, 400);
 };
 
-const handleJWTError    = () => new AppError("Invalid token. Please login again.", 401);
-const handleJWTExpired  = () => new AppError("Session expired. Please login again.", 401);
+const handleJWTError = () =>
+  new AppError("Invalid token. Please login again.", 401);
+const handleJWTExpired = () =>
+  new AppError("Session expired. Please login again.", 401);
+const handleJSONParseError = () => new AppError("Invalid JSON payload.", 400);
 
 // ── Sender ─────────────────────────────────────────────────────
 const sendError = (err, res) => {
   if (err.isOperational) {
     // Known / expected error → tell client
     return res.status(err.statusCode).json({
-      status:  err.status,
+      status: err.status,
       message: err.message,
     });
   }
@@ -32,7 +35,7 @@ const sendError = (err, res) => {
   // Unknown / programmer error → hide details
   console.error("💥 UNEXPECTED ERROR:", err);
   return res.status(500).json({
-    status:  "error",
+    status: "error",
     message: "Something went wrong. Please try again later.",
   });
 };
@@ -41,22 +44,33 @@ const sendError = (err, res) => {
 // Must have 4 params so Express recognises it as an error handler
 const errorMiddleware = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.status     = err.status     || "error";
+  err.status = err.status || "error";
 
   // Clone so we don't mutate the original
   let error = Object.assign(Object.create(Object.getPrototypeOf(err)), err);
   error.message = err.message;
+  error.stack = err.stack;
 
-  if (error.name === "CastError")       error = handleCastError(error);
-  if (error.code  === 11000)            error = handleDuplicateKey(error);
-  if (error.name === "ValidationError") error = handleValidationError(error);
-  if (error.name === "JsonWebTokenError") error = handleJWTError();
-  if (error.name === "TokenExpiredError") error = handleJWTExpired();
+  if (error.name === "CastError") {
+    error = handleCastError(error);
+  } else if (error.code === 11000) {
+    error = handleDuplicateKey(error);
+  } else if (error.name === "ValidationError") {
+    error = handleValidationError(error);
+  } else if (error.name === "JsonWebTokenError") {
+    error = handleJWTError();
+  } else if (error.name === "TokenExpiredError") {
+    error = handleJWTExpired();
+  } else if (error.type === "entity.parse.failed") {
+    error = handleJSONParseError();
+  }
 
-  // Capture exception in Sentry if available (do not crash if Sentry not installed)
+  // Capture exception in Sentry if available (do not crash if Sentry not installed).
+  // Only report unexpected/programmer errors — routine operational errors
+  // (validation failures, invalid OTP, etc.) would otherwise flood Sentry.
   try {
-    const Sentry = require('@sentry/node');
-    if (Sentry && process.env.SENTRY_DSN) {
+    const Sentry = require("@sentry/node");
+    if (Sentry && process.env.SENTRY_DSN && !error.isOperational) {
       Sentry.captureException(err);
     }
   } catch (_) {

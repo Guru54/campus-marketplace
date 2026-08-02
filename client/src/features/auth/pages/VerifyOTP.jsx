@@ -74,7 +74,7 @@ const VerifyOTP = () => {
   const handleResend = async () => {
     setResending(true);
     try {
-      await authAPI.register({ email, _resend: true });
+      await authAPI.resendOTP({ email });
       toast.success("OTP resent!");
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();

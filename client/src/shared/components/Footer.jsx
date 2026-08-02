@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { navLinks } from "@/data/navLinks";
 
 const Footer = () => (
-  <footer className="relative px-6 md:px-16 lg:px-24 xl:px-32 mt-40 w-full text-slate-700 dark:text-slate-300">
+  <footer className="relative px-6 md:px-16 lg:px-24 xl:px-32 mt-40 w-full text-slate-700 dark:text-slate-300 lazy-paint">
     <div className="flex flex-col md:flex-row justify-between w-full gap-10 border-b border-gray-200 dark:border-slate-700 pb-6">
 
       {/* Brand */}

@@ -1,7 +1,7 @@
-const multer    = require("multer");
+const multer = require("multer");
 const streamifier = require("streamifier");
 const cloudinary = require("../config/cloudinaryConfig");
-const AppError  = require("../utils/AppError");
+const AppError = require("../utils/AppError");
 
 // ── Multer — memory storage (no disk writes) ───────────────
 const storage = multer.memoryStorage();
@@ -34,7 +34,7 @@ const uploadToCloudinary = (buffer, folder) =>
       (error, result) => {
         if (error) reject(new AppError("Image upload failed", 500));
         else resolve(result.secure_url);
-      }
+      },
     );
     streamifier.createReadStream(buffer).pipe(stream);
   });
@@ -61,7 +61,9 @@ const uploadListingImages = [
 
     try {
       const urls = await Promise.all(
-        req.files.map((f) => uploadToCloudinary(f.buffer, "campus_marketplace/listings"))
+        req.files.map((f) =>
+          uploadToCloudinary(f.buffer, "campus_marketplace/listings"),
+        ),
       );
 
       const mergedImages = [...existingImages, ...urls];
@@ -85,7 +87,10 @@ const uploadAvatar = [
     if (!req.file) return next();
 
     try {
-      const url = await uploadToCloudinary(req.file.buffer, "campus_marketplace/avatars");
+      const url = await uploadToCloudinary(
+        req.file.buffer,
+        "campus_marketplace/avatars",
+      );
       req.body.avatar = url;
       next();
     } catch (err) {

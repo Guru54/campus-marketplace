@@ -1,5 +1,6 @@
-const bcrypt   = require("bcryptjs");
-const User     = require("../models/User");
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
+const AuditLog = require("../models/AuditLog");
 const AppError = require("../utils/AppError");
 
 // ─────────────────────────────────────────────────────────────
@@ -7,10 +8,12 @@ const AppError = require("../utils/AppError");
 // ─────────────────────────────────────────────────────────────
 const getProfile = async (userId, requestingUser) => {
   const user = await User.findOne({
-    _id:     userId,
+    _id: userId,
     college: requestingUser.college, // college-scoped: only same college
   })
-    .select("firstName lastName avatar isOnline lastSeen createdAt college role")
+    .select(
+      "firstName lastName avatar isOnline lastSeen createdAt college role",
+    )
     .populate("college", "name city state")
     .lean({ virtuals: true });
 
@@ -28,8 +31,8 @@ const updateProfile = async (data, userId) => {
   if (!user) throw new AppError("User not found", 404);
 
   if (firstName) user.firstName = firstName;
-  if (lastName)  user.lastName  = lastName;
-  if (avatar)    user.avatar    = avatar;
+  if (lastName) user.lastName = lastName;
+  if (avatar) user.avatar = avatar;
 
   await user.save();
   return user;
@@ -38,7 +41,7 @@ const updateProfile = async (data, userId) => {
 // ─────────────────────────────────────────────────────────────
 // Change password
 // ─────────────────────────────────────────────────────────────
-const changePassword = async (data, userId) => {
+const changePassword = async (data, userId, ip) => {
   const { currentPassword, newPassword } = data;
 
   const user = await User.findById(userId).select("+password");
@@ -48,7 +51,10 @@ const changePassword = async (data, userId) => {
   if (!isMatch) throw new AppError("Current password is incorrect", 401);
 
   user.password = await bcrypt.hash(newPassword, 12);
+  user.passwordChangedAt = new Date();
   await user.save();
+
+  await AuditLog.create({ action: "CHANGE_PASSWORD", user: user._id, ip });
 };
 
 module.exports = { getProfile, updateProfile, changePassword };

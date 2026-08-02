@@ -12,7 +12,7 @@ const CATEGORY = [
 ];
 
 const CONDITION = ["NEW", "LIKE_NEW", "GOOD", "FAIR"];
-const STATUS    = ["ACTIVE", "RESERVED", "SOLD", "EXPIRED"];
+const STATUS = ["ACTIVE", "RESERVED", "SOLD", "EXPIRED"];
 
 const listingSchema = new mongoose.Schema(
   {
@@ -104,7 +104,7 @@ const listingSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // ── Indexes ────────────────────────────────────────────────
@@ -123,7 +123,7 @@ listingSchema.virtual("isFree").get(function () {
 });
 
 // ── toJSON ─────────────────────────────────────────────────
-listingSchema.set("toJSON",   { virtuals: true });
+listingSchema.set("toJSON", { virtuals: true });
 listingSchema.set("toObject", { virtuals: true });
 
 module.exports = mongoose.model("Listing", listingSchema);

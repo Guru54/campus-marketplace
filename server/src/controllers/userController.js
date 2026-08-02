@@ -1,4 +1,4 @@
-const userService  = require("../services/user.service");
+const userService = require("../services/user.service");
 const asyncHandler = require("../utils/asyncHandler");
 const sendResponse = require("../utils/sendResponse");
 
@@ -17,15 +17,20 @@ const getProfile = asyncHandler(async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 const updateProfile = asyncHandler(async (req, res) => {
   const user = await userService.updateProfile(req.body, req.user._id);
-  sendResponse(res, 200, {
-    user: {
-      _id:       user._id,
-      firstName: user.firstName,
-      lastName:  user.lastName,
-      avatar:    user.avatar,
-      avatarUrl: user.avatarUrl,
+  sendResponse(
+    res,
+    200,
+    {
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar,
+        avatarUrl: user.avatarUrl,
+      },
     },
-  }, "Profile updated successfully");
+    "Profile updated successfully",
+  );
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -33,7 +38,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 // @access  Private
 // ─────────────────────────────────────────────────────────────
 const changePassword = asyncHandler(async (req, res) => {
-  await userService.changePassword(req.body, req.user._id);
+  await userService.changePassword(req.body, req.user._id, req.ip);
   sendResponse(res, 200, null, "Password changed successfully");
 });
 

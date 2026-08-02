@@ -1,8 +1,8 @@
 const { Server } = require("socket.io");
-const jwt        = require("jsonwebtoken");
-const User       = require("../models/User");
-const Chat       = require("../models/Chat");
-const Message    = require("../models/Message");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
 
 // ── Socket Auth Middleware ─────────────────────────────────
 const socketAuth = async (socket, next) => {
@@ -18,7 +18,9 @@ const socketAuth = async (socket, next) => {
     if (!token) return next(new Error("Authentication required"));
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user    = await User.findById(decoded.userId).select("-password -otp -otpExpiry");
+    const user = await User.findById(decoded.userId).select(
+      "-password -otp -otpExpiry",
+    );
 
     if (!user || !user.isVerified) return next(new Error("Unauthorized"));
 
@@ -31,7 +33,6 @@ const socketAuth = async (socket, next) => {
 
 // ─────────────────────────────────────────────────────────────
 const initSocket = (httpServer) => {
-
   const allowedOrigins = [
     "http://localhost:5173",
     "http://localhost:5174",
@@ -56,8 +57,10 @@ const initSocket = (httpServer) => {
 
   io.on("connection", async (socket) => {
     const user = socket.user;
-    const logger = require('../utils/logger');
-    logger.log(`🔌 Connected: ${user.firstName} ${user.lastName} [${socket.id}]`);
+    const logger = require("../utils/logger");
+    logger.log(
+      `🔌 Connected: ${user.firstName} ${user.lastName} [${socket.id}]`,
+    );
 
     // ── Mark user online ─────────────────────────────────
     await User.findByIdAndUpdate(user._id, {
@@ -76,7 +79,7 @@ const initSocket = (httpServer) => {
     socket.on("join_chat", async ({ chatId }) => {
       try {
         const chat = await Chat.findOne({
-          _id:          chatId,
+          _id: chatId,
           participants: user._id,
         });
         if (!chat) return socket.emit("error", { message: "Chat not found" });
@@ -102,21 +105,22 @@ const initSocket = (httpServer) => {
           return socket.emit("error", { message: "Invalid message" });
 
         const chat = await Chat.findOne({
-          _id:          chatId,
+          _id: chatId,
           participants: user._id,
         });
         if (!chat) return socket.emit("error", { message: "Chat not found" });
 
         // Save message, include clientId if provided
         const message = await Message.create({
-          chat:    chatId,
-          sender:  user._id,
+          chat: chatId,
+          sender: user._id,
           content: content.trim(),
-          ...(clientId ? { clientId } : {})
+          ...(clientId ? { clientId } : {}),
         });
 
         // Update chat preview
-        chat.lastMessage   = content.length > 60 ? content.slice(0, 57) + "..." : content.trim();
+        chat.lastMessage =
+          content.length > 60 ? content.slice(0, 57) + "..." : content.trim();
         chat.lastMessageAt = new Date();
         await chat.save();
 
@@ -129,17 +133,17 @@ const initSocket = (httpServer) => {
         io.to(chatId).emit("new_message", {
           ...messageObj,
           chatId,
-          clientId
+          clientId,
         });
 
         // Push inbox update to the other participant (who may not be in room)
         const otherId = chat.participants.find(
-          (p) => p.toString() !== user._id.toString()
+          (p) => p.toString() !== user._id.toString(),
         );
         if (otherId) {
           io.to(otherId.toString()).emit("inbox_update", {
             chatId,
-            lastMessage:   chat.lastMessage,
+            lastMessage: chat.lastMessage,
             lastMessageAt: chat.lastMessageAt,
           });
         }
@@ -149,33 +153,26 @@ const initSocket = (httpServer) => {
     });
 
     // ── Typing Indicators ─────────────────────────────────
-socket.on("typing", ({ chatId }) => {
+    socket.on("typing", ({ chatId }) => {
+      socket.to(chatId).emit("typing", {
+        userId: user._id,
+        typingChatId: chatId,
 
-  socket.to(chatId).emit("typing", {
-
-   userId: user._id,
-    typingChatId: chatId,
-
-    user: {
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatar: user.avatar,
-      profilePicture: user.profilePicture,
-    },
-
-  });
-
-});
-socket.on("stop_typing", ({ chatId }) => {
-
-  socket.to(chatId).emit("stop_typing", {
-userId: user._id,
-    typingChatId: chatId
-
-  });
-
-});
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatar: user.avatar,
+          profilePicture: user.profilePicture,
+        },
+      });
+    });
+    socket.on("stop_typing", ({ chatId }) => {
+      socket.to(chatId).emit("stop_typing", {
+        userId: user._id,
+        typingChatId: chatId,
+      });
+    });
     // ── Event logging (controlled by logger) ─
     socket.onAny((event, ...args) => {
       logger.log("EVENT:", event, args);
@@ -187,7 +184,7 @@ userId: user._id,
       try {
         await Message.updateMany(
           { chat: chatId, sender: { $ne: user._id }, isRead: false },
-          { isRead: true }
+          { isRead: true },
         );
         socket.to(chatId).emit("messages_read", { chatId, readBy: user._id });
       } catch {
@@ -206,7 +203,7 @@ userId: user._id,
       });
 
       socket.broadcast.emit("user_offline", {
-        userId:   user._id,
+        userId: user._id,
         lastSeen: new Date(),
       });
     });

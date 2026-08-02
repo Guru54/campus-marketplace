@@ -1,34 +1,32 @@
-const Listing      = require("../models/Listing");
-const AuditLog     = require("../models/AuditLog");
-const AppError     = require("../utils/AppError");
-const paginate     = require("../utils/paginate");
+const Listing = require("../models/Listing");
+const AuditLog = require("../models/AuditLog");
+const AppError = require("../utils/AppError");
+const paginate = require("../utils/paginate");
 
 // ── Sort map ───────────────────────────────────────────────
 const SORT_MAP = {
-  newest:     { createdAt: -1 },
-  oldest:     { createdAt:  1 },
-  price_asc:  { price:      1 },
-  price_desc: { price:     -1 },
+  newest: { createdAt: -1 },
+  oldest: { createdAt: 1 },
+  price_asc: { price: 1 },
+  price_desc: { price: -1 },
 };
 
 // ─────────────────────────────────────────────────────────────
 // Get Listings — college-scoped feed with filters + pagination
 // ─────────────────────────────────────────────────────────────
 const getListings = async (query, collegeId) => {
-  const {
-    page, limit, category, condition,
-    minPrice, maxPrice, search, sort,
-  } = query;
+  const { page, limit, category, condition, minPrice, maxPrice, search, sort } =
+    query;
 
   const { skip, limit: lim, page: pg } = paginate(page, limit);
 
   // ── Build filter ─────────────────────────────────────────
   const filter = {
     college: collegeId,
-    status:  "ACTIVE",
+    status: "ACTIVE",
   };
 
-  if (category)  filter.category  = category;
+  if (category) filter.category = category;
   if (condition) filter.condition = condition;
 
   if (minPrice !== undefined || maxPrice !== undefined) {
@@ -42,7 +40,9 @@ const getListings = async (query, collegeId) => {
   // ── Query ────────────────────────────────────────────────
   const [listings, total] = await Promise.all([
     Listing.find(filter)
-      .select("title price images category condition isNegotiable isFree seller createdAt")
+      .select(
+        "title price images category condition isNegotiable isFree seller createdAt",
+      )
       .populate("seller", "firstName lastName avatar")
       .sort(SORT_MAP[sort] || SORT_MAP.newest)
       .skip(skip)
@@ -56,11 +56,11 @@ const getListings = async (query, collegeId) => {
     listings,
     pagination: {
       total,
-      page:       pg,
-      limit:      lim,
+      page: pg,
+      limit: lim,
       totalPages: Math.ceil(total / lim),
-      hasNext:    pg < Math.ceil(total / lim),
-      hasPrev:    pg > 1,
+      hasNext: pg < Math.ceil(total / lim),
+      hasPrev: pg > 1,
     },
   };
 };
@@ -87,7 +87,7 @@ const getListingById = async (listingId, collegeId) => {
 const createListing = async (data, user, ip) => {
   const listing = await Listing.create({
     ...data,
-    seller:  user._id,
+    seller: user._id,
     college: user.college,
   });
 
@@ -100,7 +100,10 @@ const createListing = async (data, user, ip) => {
 // Update Listing — only owner can update
 // ─────────────────────────────────────────────────────────────
 const updateListing = async (listingId, data, user) => {
-  const listing = await Listing.findOne({ _id: listingId, college: user.college });
+  const listing = await Listing.findOne({
+    _id: listingId,
+    college: user.college,
+  });
 
   if (!listing) throw new AppError("Listing not found", 404);
 
@@ -117,12 +120,22 @@ const updateListing = async (listingId, data, user) => {
 // Delete Listing — soft delete (status = EXPIRED)
 // ─────────────────────────────────────────────────────────────
 const deleteListing = async (listingId, user, ip) => {
-  const listing = await Listing.findOne({ _id: listingId, college: user.college });
+  // Admins can moderate listings platform-wide; regular users are
+  // still scoped to their own college (enforced by the filter below).
+  const filter =
+    user.role === "ADMIN"
+      ? { _id: listingId }
+      : { _id: listingId, college: user.college };
+
+  const listing = await Listing.findOne(filter);
 
   if (!listing) throw new AppError("Listing not found", 404);
 
   // Admins can delete any listing; others only their own
-  if (user.role !== "ADMIN" && listing.seller.toString() !== user._id.toString())
+  if (
+    user.role !== "ADMIN" &&
+    listing.seller.toString() !== user._id.toString()
+  )
     throw new AppError("You are not authorized to delete this listing", 403);
 
   listing.status = "EXPIRED";
@@ -156,11 +169,11 @@ const getMyListings = async (query, user) => {
     listings,
     pagination: {
       total,
-      page:       pg,
-      limit:      lim,
+      page: pg,
+      limit: lim,
       totalPages: Math.ceil(total / lim),
-      hasNext:    pg < Math.ceil(total / lim),
-      hasPrev:    pg > 1,
+      hasNext: pg < Math.ceil(total / lim),
+      hasPrev: pg > 1,
     },
   };
 };

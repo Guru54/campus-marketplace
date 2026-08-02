@@ -17,8 +17,22 @@
     }
   }
 
+  @keyframes campus-ticker {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
   .animate-shimmer {
     animation: shimmer 1.5s infinite;
+  }
+
+  .animate-campus-ticker {
+    animation: campus-ticker 34s linear infinite;
   }
 
   .scrollbar-hide {
@@ -39,5 +53,10 @@
   }
   h1, h2, h3, h4 {
     font-family: 'Inter Tight', sans-serif;
+  }
+
+  .lazy-paint {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 900px;
   }
 }

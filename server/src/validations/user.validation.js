@@ -14,9 +14,11 @@ const updateProfileSchema = Joi.object({
 
   // avatar comes from upload middleware as a URL
   avatar: Joi.string().uri().allow("").optional(),
-}).min(1).messages({
-  "object.min": "Provide at least one field to update",
-});
+})
+  .min(1)
+  .messages({
+    "object.min": "Provide at least one field to update",
+  });
 
 // ── Change Password ────────────────────────────────────────
 const changePasswordSchema = Joi.object({
@@ -30,17 +32,18 @@ const changePasswordSchema = Joi.object({
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
     .required()
     .messages({
-      "string.min":          "New password must be at least 8 characters",
-      "string.max":          "New password must be at most 32 characters",
-      "string.pattern.base": "New password must contain uppercase, lowercase and a number",
-      "any.required":        "New password is required",
+      "string.min": "New password must be at least 8 characters",
+      "string.max": "New password must be at most 32 characters",
+      "string.pattern.base":
+        "New password must contain uppercase, lowercase and a number",
+      "any.required": "New password is required",
     }),
 
   confirmPassword: Joi.string()
     .valid(Joi.ref("newPassword"))
     .required()
     .messages({
-      "any.only":     "Passwords do not match",
+      "any.only": "Passwords do not match",
       "any.required": "Please confirm your new password",
     }),
 });

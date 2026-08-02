@@ -1,4 +1,4 @@
-const chatService  = require("../services/chat.service");
+const chatService = require("../services/chat.service");
 const asyncHandler = require("../utils/asyncHandler");
 const sendResponse = require("../utils/sendResponse");
 
@@ -25,7 +25,11 @@ const getMyChats = asyncHandler(async (req, res) => {
 // @access  Private — participant only
 // ─────────────────────────────────────────────────────────────
 const getMessages = asyncHandler(async (req, res) => {
-  const result = await chatService.getMessages(req.params.chatId, req.query, req.user);
+  const result = await chatService.getMessages(
+    req.params.chatId,
+    req.query,
+    req.user,
+  );
   sendResponse(res, 200, result);
 });
 
@@ -37,7 +41,7 @@ const sendMessage = asyncHandler(async (req, res) => {
   const message = await chatService.sendMessage(
     req.params.chatId,
     req.body.content,
-    req.user
+    req.user,
   );
   sendResponse(res, 201, { message }, "Message sent");
 });
@@ -51,4 +55,10 @@ const deleteChat = asyncHandler(async (req, res) => {
   sendResponse(res, 200, null, "Chat deleted");
 });
 
-module.exports = { startChat, getMyChats, getMessages, sendMessage, deleteChat };
+module.exports = {
+  startChat,
+  getMyChats,
+  getMessages,
+  sendMessage,
+  deleteChat,
+};

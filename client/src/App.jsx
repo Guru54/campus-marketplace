@@ -7,6 +7,7 @@ import { Navbar, Footer, LenisScroll } from "@/shared/components";
 import { AppLoader } from "@/shared/components/skeletons";
 import ProtectedRoute from "@/features/auth/components/ProtectedRoute";
 import PublicOnlyRoute from "@/features/auth/components/PublicOnlyRoute";
+import AdminRoute from "@/features/admin/components/AdminRoute";
 import { Toaster } from 'react-hot-toast';
 
 // Lazy load pages for code splitting
@@ -14,6 +15,9 @@ const Home = lazy(() => import("@/features/home/pages/Home"));
 const Login = lazy(() => import("@/features/auth/pages/Login"));
 const Register = lazy(() => import("@/features/auth/pages/Register"));
 const VerifyOTP = lazy(() => import("@/features/auth/pages/VerifyOTP"));
+const ForgotPassword = lazy(() => import("@/features/auth/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/features/auth/pages/ResetPassword"));
+const AdminDashboard = lazy(() => import("@/features/admin/pages/AdminDashboard"));
 const Listings = lazy(() => import("@/features/listings/pages/Listings"));
 const ListingDetail = lazy(() => import("@/features/listings/pages/ListingDetail"));
 const CreateListing = lazy(() => import("@/features/listings/pages/CreateListing"));
@@ -67,6 +71,18 @@ function AppLayout() {
             element={<PublicOnlyRoute><Register /></PublicOnlyRoute>}
           />
           <Route path="/verify-otp" element={<VerifyOTP />} />
+          <Route
+            path="/forgot-password"
+            element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>}
+          />
+          <Route
+            path="/reset-password"
+            element={<PublicOnlyRoute><ResetPassword /></PublicOnlyRoute>}
+          />
+          <Route
+            path="/admin"
+            element={<AdminRoute><AdminDashboard /></AdminRoute>}
+          />
           <Route path="/listings" element={<Listings />} />
           <Route path="/listings/:id" element={<ListingDetail />} />
           <Route path="/profile/:id" element={<Profile />} />

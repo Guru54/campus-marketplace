@@ -59,7 +59,7 @@ const chatSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // ── Pre-save Hook ──────────────────────────────────────────
@@ -68,24 +68,19 @@ const chatSchema = new mongoose.Schema(
 // Note: Mongoose 7+ pre-hooks use async — no `next` callback
 chatSchema.pre("save", async function () {
   if (this.isModified("participants")) {
-    this.participants.sort((a, b) =>
-      a.toString().localeCompare(b.toString())
-    );
+    this.participants.sort((a, b) => a.toString().localeCompare(b.toString()));
   }
 });
 
 // ── Indexes ──────────────────────────���─────────────────────
-chatSchema.index({ participants: 1 });        // fetch user's chats
-chatSchema.index({ listing: 1 });             // chats per listing
-chatSchema.index({ college: 1 });             // campus isolation
-chatSchema.index({ lastMessageAt: -1 });      // inbox sort newest first
+chatSchema.index({ participants: 1 }); // fetch user's chats
+chatSchema.index({ listing: 1 }); // chats per listing
+chatSchema.index({ college: 1 }); // campus isolation
+chatSchema.index({ lastMessageAt: -1 }); // inbox sort newest first
 
 // ── Compound Unique ────────────────────────────────────────
 // Pre-save sorts participants → [A,B] always
 // Duplicate chat impossible ✅
-chatSchema.index(
-  { listing: 1, participants: 1 },
-  { unique: true }
-);
+chatSchema.index({ listing: 1, participants: 1 }, { unique: true });
 
 module.exports = mongoose.model("Chat", chatSchema);
